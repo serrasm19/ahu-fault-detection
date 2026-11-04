@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from ahu_fdd.config import FAULT_TYPES, PATHS, Paths
-from ahu_fdd.data import load_labels, load_metadata, load_sensors
+from ahu_fdd.data import label_rows, load_labels, load_metadata, load_sensors
 
 
 @pytest.fixture
@@ -72,3 +72,24 @@ def test_real_labels_and_metadata_are_consistent():
     assert (labels["end"] > labels["start"]).all()
     assert set(labels["ahu_id"]) <= set(meta["ahu_id"])
     assert len(meta) == 40
+
+
+def test_label_rows_marks_only_rows_inside_the_event():
+    df = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"] * 3 + ["B1-AHU-02"],
+            "timestamp": pd.to_datetime(
+                ["2025-01-01 00:00", "2025-01-01 00:05", "2025-01-01 00:10", "2025-01-01 00:05"]
+            ),
+        }
+    )
+    labels = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"],
+            "fault_type": ["oa_damper_stuck"],
+            "start": pd.to_datetime(["2025-01-01 00:05"]),
+            "end": pd.to_datetime(["2025-01-01 00:10"]),
+        }
+    )
+    # end is exclusive and other AHUs are not touched
+    assert label_rows(df, labels).tolist() == ["normal", "oa_damper_stuck", "normal", "normal"]
