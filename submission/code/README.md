@@ -1,6 +1,6 @@
 # AHU fault detection and diagnosis
 
-Work in progress.
+Work in progress. The docs start at [docs/00 - Project map.md](docs/00%20-%20Project%20map.md).
 
 ## Setup
 
