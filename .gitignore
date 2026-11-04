@@ -37,3 +37,6 @@ venv/
 
 # OS
 .DS_Store
+
+# graphify-axet
+.graphify/
