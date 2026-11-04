@@ -18,10 +18,8 @@ def rule_predictions(df: pd.DataFrame, rules: dict = RULES) -> pd.Series:
         df["oa_fraction_1h"] < rules["flap_fraction_max"]
     )
     bias = df["rest_offset_dev"].abs() > rules["bias_offset_c"]
-    weak = (
-        (df["cooling_ratio"] < rules["weak_cooling_ratio"])
-        & (df["valve_dev"] > rules["weak_valve_up"])
-        & (df["sat_error_dev"].abs() <= rules["tap_error_c"])
+    weak = (df["valve_excess"] > rules["weak_valve_excess"]) & (
+        df["sat_error_dev"].abs() <= rules["tap_error_c"]
     )
 
     pred = pd.Series(NORMAL, index=df.index, dtype=object)

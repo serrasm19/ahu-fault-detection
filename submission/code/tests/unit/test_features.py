@@ -10,6 +10,7 @@ from ahu_fdd.features import (
     outdoor_air_fraction,
     sat_error,
     sat_offset_at_rest,
+    valve_curve,
 )
 
 
@@ -117,6 +118,16 @@ def test_baselines_and_deviations_compare_with_the_same_ahu():
     base = ahu_baselines(feats)
     # The fault rows are not part of the normal
     assert base.loc["B3-AHU-02", "base_sat_error"] == 0.0
-    out = add_deviations(feats, base)
+    out = add_deviations(feats, base, valve_curve(feats))
     assert out["sat_error_dev"].iloc[-1] == 7.0
-    assert out["cooling_ratio"].iloc[30] == pytest.approx(1.0)
+    # Healthy rows need exactly their usual valve for their work
+    assert out["valve_excess"].iloc[30] == pytest.approx(0.0)
+
+
+def test_valve_excess_finds_more_valve_for_the_same_work():
+    # Same cooling work all along (fan 60%, 12 °C cooled), but the valve opens from 50% to 80%
+    df = _running_log(n=80, chw_valve_cmd_pct=[50.0] * 40 + [80.0] * 40)
+    df.loc[40:, "label"] = "low_coil_capacity"
+    feats = add_features(df)
+    out = add_deviations(feats, ahu_baselines(feats), valve_curve(feats))
+    assert out["valve_excess"].iloc[-1] == pytest.approx(30.0)

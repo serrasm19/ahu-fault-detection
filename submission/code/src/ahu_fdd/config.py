@@ -51,6 +51,9 @@ STARTUP_MINUTES = 30
 SHORT_WINDOW_ROWS = 12  # 1 hour
 LONG_WINDOW_ROWS = 36  # 3 hours
 REST_CHECK_KEEP_ROWS = 576  # 48 hours
+LOAD_BIN = (
+    1.0  # cooling work (fan speed share x °C cooled) grouped in steps of 1 for the valve curve
+)
 
 # Rules baseline: one simple physics rule per fault (notebook 04), on the smoothed signals
 RULES = {
@@ -59,8 +62,7 @@ RULES = {
     "flap_fraction_drop": 0.05,  # outdoor air fraction below the AHU normal by this much
     "flap_fraction_max": 0.03,  # and almost no outdoor air
     "bias_offset_c": 1.5,  # check at rest away from the AHU normal, °C
-    "weak_cooling_ratio": 0.8,  # cooling per valve below 80% of the AHU normal
-    "weak_valve_up": 5.0,  # and the valve more open than usual, points
+    "weak_valve_excess": 10.0,  # valve more open than this machine needs for the same work, points
 }
 
 # Post-processing: an alarm must last at least this many fan-on rows (2 hours)

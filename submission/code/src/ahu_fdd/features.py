@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from ahu_fdd.config import (
+    LOAD_BIN,
     LONG_WINDOW_ROWS,
     MIN_MIX_DELTA_C,
     MIN_REST_MINUTES,
@@ -100,7 +101,7 @@ MODEL_FEATURES = [
     "oa_fraction_dev",
     "damper_dev",
     "co2_dev",
-    "cooling_ratio",
+    "valve_excess",
     "rest_offset_dev",
 ]
 
@@ -145,6 +146,11 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     # Weather change over the last hour: a storm can move the valve for a short time
     out["oat_change_1h"] = out["oat_c"] - out.groupby("ahu_id")["oat_c"].shift(SHORT_WINDOW_ROWS)
 
+    # Cooling work: how much air (fan speed share) times how much it is cooled (MAT - SAT).
+    # Grouped in steps, to compare the valve with the same machine doing the same work
+    work = out["fan_speed_pct"] / 100 * (out["mat_c"] - out["sat_c"])
+    out["load_bin"] = (work / LOAD_BIN).round().clip(lower=0).where(running)
+
     # Last check at rest (fan off for an hour), carried to the next fan-on rows for 48 hours
     out["last_rest_offset"] = out.groupby("ahu_id")["rest_offset"].ffill(limit=REST_CHECK_KEEP_ROWS)
     return out
@@ -162,14 +168,27 @@ def ahu_baselines(df: pd.DataFrame) -> pd.DataFrame:
     return base.add_prefix("base_")
 
 
-def add_deviations(df: pd.DataFrame, baselines: pd.DataFrame) -> pd.DataFrame:
+def valve_curve(df: pd.DataFrame) -> pd.Series:
+    """Each AHU's usual valve opening for each step of cooling work (healthy running rows).
+
+    A weak coil needs more valve than usual for the same work. Comparing with the same
+    machine doing the same work avoids false alarms on hot afternoons (notebook 03).
+    """
+    healthy = df[(df["label"] == NORMAL) & (df["minutes_on"] >= STARTUP_MINUTES)]
+    curve = healthy.groupby(["ahu_id", "load_bin"])["chw_valve_cmd_pct"].median()
+    return curve.rename("expected_valve")
+
+
+def add_deviations(df: pd.DataFrame, baselines: pd.DataFrame, curve: pd.Series) -> pd.DataFrame:
     """Compare each smoothed signal with the same AHU's normal (notebook 03: machines differ)."""
-    out = df.join(baselines, on="ahu_id")
+    out = df.join(baselines, on="ahu_id").join(curve, on=["ahu_id", "load_bin"])
     out["sat_error_dev"] = out["sat_error_1h"] - out["base_sat_error"]
     out["valve_dev"] = out["valve_1h"] - out["base_chw_valve_cmd_pct"]
     out["oa_fraction_dev"] = out["oa_fraction_1h"] - out["base_oa_fraction"]
     out["damper_dev"] = out["oa_damper_cmd_pct"] - out["base_oa_damper_cmd_pct"]
     out["co2_dev"] = out["co2_ppm"] - out["base_co2_ppm"]
-    out["cooling_ratio"] = out["cooling_per_valve_3h"] / out["base_cooling_per_valve"]
+    # Valve above what this machine usually needs for the same work (0 = as usual), over 3 hours
+    out["valve_excess_row"] = out["chw_valve_cmd_pct_run"] - out["expected_valve"]
+    out["valve_excess"] = _rolling_median(out, "valve_excess_row", LONG_WINDOW_ROWS)
     out["rest_offset_dev"] = out["last_rest_offset"] - out["base_rest_offset"]
     return out
