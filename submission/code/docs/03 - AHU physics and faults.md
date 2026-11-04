@@ -62,6 +62,22 @@ A few more things to know:
 - In the office and the hospital, the flap also opens more when CO2 goes up (more people, more fresh air needed).
 - When the fan is off, no air moves and the sensor values mean little. Only rows with the fan on are scored.
 
+## What a healthy machine does
+
+From `notebooks/03_patterns.ipynb` (cleaned data, fan on, no fault label). A fault is a change from this normal, so I need to know how much normal already moves.
+
+- **A normal day:** the valve and the fan follow the outside temperature and the people inside. The valve is about 30% at night and 60% in the afternoon. The office dips at 12:00 (lunch). The supply air stays near its setpoint.
+- **Setpoints:** each machine has one fixed supply air setpoint, but they differ between machines (12.5 to 14.5 °C). So I always use the error `sat_c - sat_sp_c`, not `sat_c`.
+- **Start-up:** in the first 15 minutes after the fan starts, the supply air is about 5 °C above its setpoint. After 30 minutes it's on target. It looks like a weak radiator, but it's just a cold start. No alarms in the first 30 minutes.
+- **Storms:** about two per week, in the afternoon. Outside air falls 3 °C in minutes and the valves close a bit.
+- **Three machines always at their limit:** B1-AHU-05 (lobby), B3-AHU-02 (cinema foyer) and B3-AHU-09 (retail L2) have the valve at 100% and the air about 2 °C too warm in 60-80% of their healthy rows, every month. They are probably too small for their zones. A global rule would alarm on them every day, so the model must compare each machine with its own normal.
+- **Normal drifts:** filters get dirty for months (the pressure drop goes up) and then are replaced (it falls in one day). So I validate in time order and don't use absolute filter or fan power values.
+- **Test looks like train:** Singapore has almost no seasons. July and August are about 0.3 °C warmer.
+
+![A normal day](../figures/03_normal_day.png)
+
+![Valve at its limit](../figures/03_valve_at_limit.png)
+
 ## The four faults, in plain words
 
 Each fault is one part of the machine failing. I give each one a plain name to remember it:

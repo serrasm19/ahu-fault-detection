@@ -22,6 +22,7 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 - Cleaning step `merge_duplicates()`: keeps one row per machine and stamp and fills empty values from the other copy (mall day 14 February saved twice). Notebook `02_data_quality` section 2.
 - EDA helper `gap_blocks()`: joins missing 5-minute slots into blocks. Notebook `02_data_quality` section 3 finds one 8-day outage in the hospital (10 to 18 March) and only 5-10 minute gaps elsewhere.
 - Cleaning steps `fix_power_units()` (fan power logged in watts), `blank_co2_limits()` (CO2 glitches) and `blank_frozen()` (frozen temperature sensors), and `clean_sensors()` that runs every fix in order. EDA helper `longest_runs()`. Notebook `02_data_quality` section 4.
+- Feature `minutes_since_fan_on()` in the new `features.py`. Notebook `03_patterns`: a normal day, fixed setpoints per machine, start-up, storms, three machines always at their limit, filter drift, train vs test.
 
 ## [0.1.0] - 2026-11-04
 
