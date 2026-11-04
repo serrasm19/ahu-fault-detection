@@ -23,5 +23,10 @@ From 2 to 8 June, the office (B1) data is saved in UTC instead of Singapore time
 - The office seems to run from 23:00 to 11:30 instead of 07:00 to 19:30, and the outside temperature peaks around 07:00 instead of 14:00.
 - Where the shifted block starts, 8 hours of 1 June appear twice with different values: these are the 96 "duplicates" per office machine. Where it ends, 8 June has an 8-hour hole.
 - The mall runs normally that week, so it only affects the office.
-- Plan: move that block 8 hours later in the cleaning step (`02_data_quality`), then check that the duplicates and the hole disappear.
+- Proof (`notebooks/02_data_quality.ipynb`, section 1): the three buildings share the same weather. In that week the office outside temperature matches the mall temperature 8 hours later (0.4 °C gap), not at the same time (3.6 °C gap). Trying every offset from -12 to +12 hours, the best one is exactly +8.
+- In each duplicate pair, the first copy in the file is the real 1 June evening and the second copy is the early-clock 2 June night.
+- Fix: `fix_clock_shift()` in `src/ahu_fdd/data.py` adds 8 hours to the office rows stamped from 1 June 16:00 to 8 June 16:00 (only the second copy in the first 8 hours). 13 stamps in those first 8 hours have only one row, so I can't tell which clock they belong to: I drop them. The limits are in `config.py`.
+- Result: no office duplicates left, missing slots drop from 0.5% to 0.3%, and the 8 June hole is filled. Only the 13 ambiguous rows are dropped. No office fault event falls in that week.
+
+![Office clock shift](../figures/02_clock_shift.png)
 
