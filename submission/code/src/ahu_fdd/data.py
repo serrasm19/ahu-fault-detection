@@ -8,6 +8,7 @@ from ahu_fdd.config import (
     CLOCK_SHIFT_OFFSET,
     CLOCK_SHIFT_START,
     CO2_LIMITS,
+    EXTRA_LABELS,
     FROZEN_MIN_HOURS,
     FROZEN_SENSORS,
     NORMAL,
@@ -33,6 +34,13 @@ def load_sensors(split: str, *, paths: Paths = PATHS) -> pd.DataFrame:
 def load_labels(*, paths: Paths = PATHS) -> pd.DataFrame:
     """Load the fault events ("repair reports"), one row per event."""
     return pd.read_csv(paths.labels, parse_dates=["start", "end"])
+
+
+def add_extra_labels(labels: pd.DataFrame, extra: tuple[dict, ...] = EXTRA_LABELS) -> pd.DataFrame:
+    """Add the faults I found in the data without a work order (see config.EXTRA_LABELS)."""
+    found = pd.DataFrame(list(extra))
+    found[["start", "end"]] = found[["start", "end"]].apply(pd.to_datetime)
+    return pd.concat([labels, found], ignore_index=True)
 
 
 def load_metadata(*, paths: Paths = PATHS) -> pd.DataFrame:

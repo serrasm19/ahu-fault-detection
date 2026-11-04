@@ -45,6 +45,16 @@ MIN_MIX_DELTA_C = 2.0  # outdoor minus return air, for the outdoor air fraction
 MIN_VALVE_PCT = 20.0  # valve opening, for cooling per valve
 MIN_REST_MINUTES = 60  # fan off for at least this long before comparing supply and mixed air
 
+# Faults I found in the data with no work order (notebook 04). Added to the labels for training
+EXTRA_LABELS = (
+    {
+        "ahu_id": "B1-AHU-11",
+        "fault_type": "oa_damper_stuck",
+        "start": "2025-04-22 07:00",
+        "end": "2025-04-30 16:00",
+    },
+)
+
 # Validation: three blocks of about two months. The cuts fall on days with no labelled event
 # in progress, so no event is split between training and validation
 FOLDS = (
