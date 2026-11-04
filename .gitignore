@@ -1,0 +1,35 @@
+# Ignore everything at the top level, then allow only what belongs in the repo
+/*
+!/.gitignore
+!/README.md
+!/.github/
+!/submission/
+
+# Inside submission/, the only csv allowed is the final predictions file
+*.csv
+!/submission/predictions.csv
+
+# Data
+*.parquet
+
+# Python, tests and notebooks
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Environments and local settings
+.venv/
+venv/
+.env
+.vscode/
+.idea/
+
+# OS
+.DS_Store
