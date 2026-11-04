@@ -43,8 +43,10 @@ The machines are very different in size (a mall unit moves up to 7 times more ai
 
 | timestamp | ahu_id | fan_status | sat_c | sat_sp_c | mat_c | rat_c | chw_valve_cmd_pct | … |
 |---|---|---|---|---|---|---|---|---|
-| 2025-03-10 10:00 | B3-AHU-02 | 1 | 13.6 | 13.5 | 25.1 | 24.3 | 52.0 | … |
-| 2025-03-10 10:05 | B3-AHU-02 | 1 | 13.4 | 13.5 | 25.2 | 24.3 | 54.5 | … |
+| 2025-03-10 10:00 | B3-AHU-01 | 1 | 13.5 | 13.5 | 24.5 | 23.9 | 45.8 | … |
+| 2025-03-10 10:05 | B3-AHU-01 | 1 | 13.5 | 13.5 | 24.5 | 24.1 | 47.4 | … |
+
+These are real rows: a healthy mall machine on a Monday morning. The air goes out at 13.5 °C, exactly its target, with the tap at about 46%.
 
 40 machines × one row every 5 minutes × 6 months ≈ 2 million rows. Time is local (UTC+8). Rows are also logged when the machine is off, but only rows with the fan on are scored.
 
