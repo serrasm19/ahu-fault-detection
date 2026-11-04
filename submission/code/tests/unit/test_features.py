@@ -2,6 +2,9 @@ import pandas as pd
 import pytest
 
 from ahu_fdd.features import (
+    add_deviations,
+    add_features,
+    ahu_baselines,
     cooling_per_valve,
     minutes_since_fan_on,
     outdoor_air_fraction,
@@ -57,3 +60,63 @@ def test_sat_offset_at_rest_only_after_the_fan_is_off_long_enough():
     # The fan stops on row 2 (0 minutes off), so rows 3 and 4 have been off for 5+ minutes
     assert out.isna().tolist() == [True, True, False, False]
     assert out.dropna().tolist() == [2.0, 2.5]
+
+
+def _running_log(n=40, **cols):
+    """A small log of one AHU with the fan on for n rows (5 minutes apart)."""
+    base = {
+        "ahu_id": "B3-AHU-01",
+        "timestamp": pd.date_range("2025-03-10 09:00", periods=n, freq="5min"),
+        "fan_status": 1,
+        "fan_speed_pct": 60.0,
+        "sat_c": 13.0,
+        "sat_sp_c": 13.0,
+        "mat_c": 25.0,
+        "rat_c": 24.0,
+        "oat_c": 30.0,
+        "chw_valve_cmd_pct": 50.0,
+        "oa_damper_cmd_pct": 20.0,
+        "co2_ppm": float("nan"),
+        "label": "normal",
+    }
+    base.update(cols)
+    return pd.DataFrame(base)
+
+
+def test_add_features_ignores_the_start_up():
+    # Supply air 5 °C too warm for the first 30 minutes (start-up), then on target
+    df = _running_log(sat_c=[18.0] * 6 + [13.0] * 34)
+    out = add_features(df)
+    # Start-up rows don't enter the smoothed error, so it is 0 once there are enough rows
+    assert out["sat_error_1h"].dropna().eq(0).all()
+    assert out["sat_error_1h"].iloc[:6].isna().all()
+
+
+def test_add_features_valve_at_limit_share():
+    df = _running_log(chw_valve_cmd_pct=[50.0] * 20 + [100.0] * 20)
+    out = add_features(df)
+    # The last 12 rows (1 hour) all have the command at 100%
+    assert out["valve_at_limit_1h"].iloc[-1] == 1.0
+    assert out["valve_at_limit_1h"].iloc[19] == 0.0
+
+
+def test_add_features_carries_the_last_check_at_rest():
+    # Fan off for 1.5 hours with the supply sensor 3 °C above the mixed air, then fan on
+    df = _running_log(n=30, fan_status=[0] * 18 + [1] * 12, sat_c=[28.0] * 18 + [13.0] * 12)
+    out = add_features(df)
+    assert out["rest_offset"].iloc[12:18].eq(3.0).all()  # off for 60+ minutes
+    assert out["last_rest_offset"].iloc[-1] == 3.0  # still known with the fan on
+
+
+def test_baselines_and_deviations_compare_with_the_same_ahu():
+    healthy = _running_log(n=60)
+    faulty = _running_log(n=60, ahu_id="B3-AHU-02", sat_c=13.0)
+    faulty.loc[48:, "sat_c"] = 20.0  # last hour: 7 °C too warm
+    faulty.loc[48:, "label"] = "chw_valve_stuck"
+    feats = add_features(pd.concat([healthy, faulty], ignore_index=True))
+    base = ahu_baselines(feats)
+    # The fault rows are not part of the normal
+    assert base.loc["B3-AHU-02", "base_sat_error"] == 0.0
+    out = add_deviations(feats, base)
+    assert out["sat_error_dev"].iloc[-1] == 7.0
+    assert out["cooling_ratio"].iloc[30] == pytest.approx(1.0)

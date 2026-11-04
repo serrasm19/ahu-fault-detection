@@ -45,6 +45,13 @@ MIN_MIX_DELTA_C = 2.0  # outdoor minus return air, for the outdoor air fraction
 MIN_VALVE_PCT = 20.0  # valve opening, for cooling per valve
 MIN_REST_MINUTES = 60  # fan off for at least this long before comparing supply and mixed air
 
+# Model features: the machine must run for this long before its readings count (notebook 03),
+# windows to smooth the readings (in 5-minute rows), and how long the last check at rest is kept
+STARTUP_MINUTES = 30
+SHORT_WINDOW_ROWS = 12  # 1 hour
+LONG_WINDOW_ROWS = 36  # 3 hours
+REST_CHECK_KEEP_ROWS = 576  # 48 hours
+
 # Faults I found in the data with no work order (notebook 04). Added to the labels for training
 EXTRA_LABELS = (
     {
