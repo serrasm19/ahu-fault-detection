@@ -21,6 +21,13 @@ NORMAL = "normal"
 SAMPLING = "5min"
 SEED = 42
 
+# One office week (B1) was saved in UTC instead of local time (UTC+8), so its stamps are
+# 8 hours early. These are the wrong stamps: real local time is 2 June 00:00 to 9 June 00:00.
+CLOCK_SHIFT_BUILDING = "B1"
+CLOCK_SHIFT_START = "2025-06-01 16:00"
+CLOCK_SHIFT_END = "2025-06-08 16:00"
+CLOCK_SHIFT_OFFSET = "8h"
+
 
 @dataclass(frozen=True)
 class Paths:

@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from ahu_fdd.config import FAULT_TYPES, PATHS, Paths
-from ahu_fdd.data import label_rows, load_labels, load_metadata, load_sensors
+from ahu_fdd.data import fix_clock_shift, label_rows, load_labels, load_metadata, load_sensors
 
 
 @pytest.fixture
@@ -93,3 +93,54 @@ def test_label_rows_marks_only_rows_inside_the_event():
     )
     # end is exclusive and other AHUs are not touched
     assert label_rows(df, labels).tolist() == ["normal", "oa_damper_stuck", "normal", "normal"]
+
+
+def test_fix_clock_shift_moves_only_the_early_rows():
+    # Block stamped 00:00 to 00:20 with a 10 minute offset. 00:00 and 00:05 are in the overlap,
+    # so they appear twice: real row first, early-clock row second.
+    stamps = ["00:00", "00:00", "00:05", "00:05", "00:10", "00:15", "00:30"]
+    df = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"] * len(stamps) + ["B3-AHU-01"],
+            "timestamp": pd.to_datetime([f"2025-06-01 {s}" for s in stamps + ["00:10"]]),
+            "value": ["real", "early", "real", "early", "early", "early", "real", "mall"],
+        }
+    )
+    out = fix_clock_shift(
+        df, building="B1", start="2025-06-01 00:00", end="2025-06-01 00:20", offset="10min"
+    )
+    b1 = out[out["ahu_id"] == "B1-AHU-01"]
+
+    # Every stamp is now unique and the hole at 00:20 and 00:25 is filled
+    assert b1["timestamp"].is_unique
+    assert b1["timestamp"].dt.strftime("%H:%M").tolist() == [
+        "00:00",
+        "00:05",
+        "00:10",
+        "00:15",
+        "00:20",
+        "00:25",
+        "00:30",
+    ]
+    assert b1["value"].tolist() == ["real", "real", "early", "early", "early", "early", "real"]
+    # Other buildings are not touched
+    assert out.loc[out["ahu_id"] == "B3-AHU-01", "timestamp"].tolist() == [
+        pd.Timestamp("2025-06-01 00:10")
+    ]
+
+
+def test_fix_clock_shift_drops_single_rows_in_the_overlap():
+    # 00:05 has only one row inside the overlap, so its clock is unknown and it is dropped
+    stamps = ["00:00", "00:00", "00:05", "00:10"]
+    df = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"] * len(stamps),
+            "timestamp": pd.to_datetime([f"2025-06-01 {s}" for s in stamps]),
+            "value": ["real", "early", "unknown", "early"],
+        }
+    )
+    out = fix_clock_shift(
+        df, building="B1", start="2025-06-01 00:00", end="2025-06-01 00:20", offset="10min"
+    )
+    assert out["value"].tolist() == ["real", "early", "early"]
+    assert out["timestamp"].dt.strftime("%H:%M").tolist() == ["00:00", "00:10", "00:20"]
