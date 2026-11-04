@@ -1,9 +1,11 @@
 import pandas as pd
+import pytest
 
 from ahu_fdd.data import add_building
 from ahu_fdd.eda import (
     coverage_by_building,
     coverage_per_ahu,
+    event_vs_normal,
     expected_slots,
     fan_on_hours_per_event,
     gap_blocks,
@@ -94,3 +96,26 @@ def test_longest_runs_finds_the_longest_flat_stretch():
     assert runs["hours"].iloc[0] == 4 * 5 / 60
     assert runs["value"].iloc[0] == 23.4
     assert runs["start"].iloc[0] == pd.Timestamp("2025-05-05 00:05")
+
+
+def test_event_vs_normal_compares_with_the_same_ahu():
+    df = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"] * 4 + ["B1-AHU-02"] * 2,
+            "timestamp": pd.date_range("2025-02-10", periods=6, freq="h"),
+            "oaf": [0.2, 0.2, 0.0, 0.0, 0.5, 0.5],
+            "label": ["normal", "normal", "oa_damper_stuck", "oa_damper_stuck", "normal", "normal"],
+        }
+    )
+    labels = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"],
+            "fault_type": ["oa_damper_stuck"],
+            "start": [pd.Timestamp("2025-02-10 02:00")],
+            "end": [pd.Timestamp("2025-02-10 04:00")],
+        }
+    )
+    out = event_vs_normal(df, labels, ["oaf"])
+    # 0.0 during the event vs 0.2 normal for B1-AHU-01 (B1-AHU-02 is not used)
+    assert out.loc[0, "oaf"] == pytest.approx(-0.2)
+    assert out.loc[0, "rows"] == 2

@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from ahu_fdd.config import SAMPLING
+from ahu_fdd.config import NORMAL, SAMPLING
 
 
 def expected_slots(start: pd.Timestamp, end: pd.Timestamp) -> int:
@@ -92,3 +92,27 @@ def longest_runs(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
                 }
             )
     return pd.DataFrame(rows)
+
+
+def event_vs_normal(df: pd.DataFrame, labels: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """For each fault event: median of each column during the event minus its AHU normal median.
+
+    Expects a 'label' column (from label_rows). Pass only the rows you want to compare,
+    for example fan on and after start-up.
+    """
+    rows = []
+    for event in labels.itertuples():
+        ahu = df[df["ahu_id"] == event.ahu_id]
+        in_event = (ahu["timestamp"] >= event.start) & (ahu["timestamp"] < event.end)
+        normal = ahu[ahu["label"] == NORMAL]
+        change = ahu.loc[in_event, columns].median() - normal[columns].median()
+        rows.append(
+            {
+                "event": event.Index,
+                "ahu_id": event.ahu_id,
+                "fault_type": event.fault_type,
+                "rows": int(in_event.sum()),
+                **change.to_dict(),
+            }
+        )
+    return pd.DataFrame(rows).set_index("event")
