@@ -45,6 +45,14 @@ MIN_MIX_DELTA_C = 2.0  # outdoor minus return air, for the outdoor air fraction
 MIN_VALVE_PCT = 20.0  # valve opening, for cooling per valve
 MIN_REST_MINUTES = 60  # fan off for at least this long before comparing supply and mixed air
 
+# Validation: three blocks of about two months. The cuts fall on days with no labelled event
+# in progress, so no event is split between training and validation
+FOLDS = (
+    ("2025-01-01", "2025-03-02"),
+    ("2025-03-02", "2025-04-26"),
+    ("2025-04-26", "2025-07-01"),
+)
+
 
 @dataclass(frozen=True)
 class Paths:
