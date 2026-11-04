@@ -30,3 +30,12 @@ From 2 to 8 June, the office (B1) data is saved in UTC instead of Singapore time
 
 ![Office clock shift](../figures/02_clock_shift.png)
 
+## One mall day saved twice
+
+Every mall (B3) machine has Friday 14 February twice. In plain words: the same page of the diary was copied into the file two times.
+
+- 97.9% of the pairs are exact copies. In the other 72 pairs, one sensor value is empty (NaN) in one copy and filled in the other. The two copies never give two different numbers.
+- It looks like the same day was exported twice, each time losing a few different values (about the same 0.2% of nulls I see in all the train data).
+- Fix: `merge_duplicates()` in `src/ahu_fdd/data.py` keeps one row per machine and stamp, and fills an empty value in one copy with the value of the other. It recovers the 73 empty values of that day.
+- It runs after `fix_clock_shift()`. Before that fix, the office "duplicates" are two different hours and must not be merged.
+- Result: no duplicates left in any building. 3,452 rows removed in total (3,439 mall copies and 13 ambiguous office rows).
