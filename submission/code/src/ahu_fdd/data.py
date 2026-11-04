@@ -83,3 +83,13 @@ def fix_clock_shift(
     out.loc[to_move, "timestamp"] = ts[to_move] + offset
     out = out[~ambiguous]
     return out.sort_values(["ahu_id", "timestamp"], kind="stable", ignore_index=True)
+
+
+def merge_duplicates(df: pd.DataFrame) -> pd.DataFrame:
+    """Keep one row per AHU and timestamp, filling a null in one copy with the other copy.
+
+    Run it after fix_clock_shift: before that, the office duplicates are different hours.
+    """
+    # first() takes, for each column, the first value that is not null among the copies
+    out = df.groupby(["ahu_id", "timestamp"], as_index=False, sort=True).first()
+    return out[df.columns]

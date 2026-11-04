@@ -2,7 +2,14 @@ import pandas as pd
 import pytest
 
 from ahu_fdd.config import FAULT_TYPES, PATHS, Paths
-from ahu_fdd.data import fix_clock_shift, label_rows, load_labels, load_metadata, load_sensors
+from ahu_fdd.data import (
+    fix_clock_shift,
+    label_rows,
+    load_labels,
+    load_metadata,
+    load_sensors,
+    merge_duplicates,
+)
 
 
 @pytest.fixture
@@ -144,3 +151,20 @@ def test_fix_clock_shift_drops_single_rows_in_the_overlap():
     )
     assert out["value"].tolist() == ["real", "early", "early"]
     assert out["timestamp"].dt.strftime("%H:%M").tolist() == ["00:00", "00:10", "00:20"]
+
+
+def test_merge_duplicates_keeps_one_row_and_fills_nulls():
+    df = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(["2025-02-14 00:00"] * 2 + ["2025-02-14 00:05"]),
+            "ahu_id": ["B3-AHU-01"] * 3,
+            "sat_c": [None, 13.0, 13.2],
+            "mat_c": [24.0, None, 24.1],
+        }
+    )
+    out = merge_duplicates(df)
+    # One row per stamp, the nulls of each copy filled by the other, columns in the same order
+    assert out["timestamp"].is_unique
+    assert out["sat_c"].tolist() == [13.0, 13.2]
+    assert out["mat_c"].tolist() == [24.0, 24.1]
+    assert list(out.columns) == list(df.columns)
