@@ -35,3 +35,4 @@ Changes are listed in [CHANGELOG.md](CHANGELOG.md), one section per version (`##
 3. Pull requests into `main` are blocked if the date is missing or the version was already released.
 4. When it reaches `main`, a workflow creates the tag `vX.Y.Z` and a GitHub Release with the notes from the changelog.
 
+
