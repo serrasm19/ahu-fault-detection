@@ -7,6 +7,7 @@ from ahu_fdd.eda import (
     expected_slots,
     fan_on_hours_per_event,
     gap_blocks,
+    longest_runs,
 )
 
 
@@ -77,3 +78,19 @@ def test_gap_blocks_groups_consecutive_missing_slots():
     assert gaps["start"].dt.strftime("%H:%M").tolist() == ["00:05", "00:20"]
     assert gaps["end"].dt.strftime("%H:%M").tolist() == ["00:05", "00:25"]
     assert gaps["hours"].tolist() == [5 / 60, 10 / 60]
+
+
+def test_longest_runs_finds_the_longest_flat_stretch():
+    df = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-07"] * 5,
+            "timestamp": pd.date_range("2025-05-05", periods=5, freq="5min"),
+            "rat_c": [22.0, 23.4, 23.4, None, 23.4],
+            "co2_ppm": [None] * 5,  # sensor not installed: skipped
+        }
+    )
+    runs = longest_runs(df, ["rat_c", "co2_ppm"])
+    assert runs["sensor"].tolist() == ["rat_c"]
+    assert runs["hours"].iloc[0] == 4 * 5 / 60
+    assert runs["value"].iloc[0] == 23.4
+    assert runs["start"].iloc[0] == pd.Timestamp("2025-05-05 00:05")

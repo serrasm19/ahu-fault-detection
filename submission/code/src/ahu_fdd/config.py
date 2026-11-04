@@ -28,6 +28,18 @@ CLOCK_SHIFT_START = "2025-06-01 16:00"
 CLOCK_SHIFT_END = "2025-06-08 16:00"
 CLOCK_SHIFT_OFFSET = "8h"
 
+# One mall machine logged fan power in watts instead of kW for three weeks (end not included)
+POWER_IN_WATTS_AHU = "B3-AHU-04"
+POWER_IN_WATTS_START = "2025-04-01"
+POWER_IN_WATTS_END = "2025-04-22"
+
+# The CO2 sensors read from 0 to 5000 ppm. Exactly 0 or 5000 means a glitch, not a real value
+CO2_LIMITS = (0, 5000)
+
+# A temperature sensor that doesn't change at all for this long is frozen (normal max: ~1.5 h)
+FROZEN_SENSORS = ("sat_c", "mat_c", "rat_c", "oat_c", "chwst_c")
+FROZEN_MIN_HOURS = 6
+
 
 @dataclass(frozen=True)
 class Paths:

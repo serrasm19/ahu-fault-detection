@@ -66,3 +66,29 @@ def gap_blocks(df: pd.DataFrame) -> pd.DataFrame:
     out = pd.concat(blocks, ignore_index=True)
     out["hours"] = out["slots"] * step / pd.Timedelta("1h")
     return out[["ahu_id", "start", "end", "slots", "hours"]]
+
+
+def longest_runs(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """Longest run of exactly the same value for each AHU and sensor: start, end and hours."""
+    step = pd.Timedelta(SAMPLING)
+    rows = []
+    for ahu_id, ahu in df.groupby("ahu_id"):
+        for col in columns:
+            # A NaN doesn't break a run: compare each row with the last known value
+            value = ahu[col].ffill()
+            if value.isna().all():
+                continue  # this AHU has no such sensor
+            run_id = (value != value.shift()).cumsum()
+            longest = run_id.value_counts().idxmax()
+            run = ahu.loc[run_id == longest, "timestamp"]
+            rows.append(
+                {
+                    "ahu_id": ahu_id,
+                    "sensor": col,
+                    "start": run.min(),
+                    "end": run.max(),
+                    "hours": len(run) * step / pd.Timedelta("1h"),
+                    "value": value[run_id == longest].iloc[0],
+                }
+            )
+    return pd.DataFrame(rows)

@@ -3,7 +3,11 @@ import pytest
 
 from ahu_fdd.config import FAULT_TYPES, PATHS, Paths
 from ahu_fdd.data import (
+    blank_co2_limits,
+    blank_frozen,
+    clean_sensors,
     fix_clock_shift,
+    fix_power_units,
     label_rows,
     load_labels,
     load_metadata,
@@ -168,3 +172,56 @@ def test_merge_duplicates_keeps_one_row_and_fills_nulls():
     assert out["sat_c"].tolist() == [13.0, 13.2]
     assert out["mat_c"].tolist() == [24.0, 24.1]
     assert list(out.columns) == list(df.columns)
+
+
+def test_fix_power_units_only_touches_the_window_of_that_ahu():
+    df = pd.DataFrame(
+        {
+            "ahu_id": ["B3-AHU-04", "B3-AHU-04", "B3-AHU-04", "B3-AHU-05"],
+            "timestamp": pd.to_datetime(
+                ["2025-03-31 23:55", "2025-04-01 00:00", "2025-04-22 00:00", "2025-04-01 00:00"]
+            ),
+            "fan_power_kw": [6.0, 6000.0, 6.0, 6.0],
+        }
+    )
+    out = fix_power_units(df, ahu_id="B3-AHU-04", start="2025-04-01", end="2025-04-22")
+    assert out["fan_power_kw"].tolist() == [6.0, 6.0, 6.0, 6.0]
+
+
+def test_blank_co2_limits_removes_only_values_at_the_limits():
+    df = pd.DataFrame({"co2_ppm": [0.0, 650.0, 5000.0, None]})
+    out = blank_co2_limits(df, limits=(0, 5000))
+    assert out["co2_ppm"].isna().tolist() == [True, False, True, True]
+
+
+def test_blank_frozen_blanks_long_runs_only():
+    # AHU-01: 20.0 for 4 rows (20 minutes, with a NaN inside), then it moves. min_hours = 15 min
+    df = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"] * 6 + ["B1-AHU-02"] * 2,
+            "timestamp": pd.date_range("2025-05-05", periods=8, freq="5min"),
+            "rat_c": [20.0, 20.0, None, 20.0, 21.0, 22.0, 20.0, 20.0],
+        }
+    )
+    out = blank_frozen(df, columns=("rat_c",), min_hours=0.25)
+    # The run of AHU-01 is blanked; the short run of AHU-02 stays (a new AHU starts a new run)
+    assert out["rat_c"].isna().tolist() == [True, True, True, True, False, False, False, False]
+
+
+def test_clean_sensors_runs_all_steps():
+    df = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(["2025-02-14 00:00"] * 2),
+            "ahu_id": ["B2-AHU-03"] * 2,
+            "fan_power_kw": [5.0, 5.0],
+            "co2_ppm": [5000.0, 5000.0],
+            "sat_c": [13.0, None],
+            "mat_c": [24.0, 24.0],
+            "rat_c": [24.5, 24.5],
+            "oat_c": [28.0, 28.0],
+            "chwst_c": [7.0, 7.0],
+        }
+    )
+    out = clean_sensors(df)
+    assert len(out) == 1
+    assert out["co2_ppm"].isna().all()
