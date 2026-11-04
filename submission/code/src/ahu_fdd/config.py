@@ -40,6 +40,11 @@ CO2_LIMITS = (0, 5000)
 FROZEN_SENSORS = ("sat_c", "mat_c", "rat_c", "oat_c", "chwst_c")
 FROZEN_MIN_HOURS = 6
 
+# Physics features: below these limits the formulas divide by almost zero
+MIN_MIX_DELTA_C = 2.0  # outdoor minus return air, for the outdoor air fraction
+MIN_VALVE_PCT = 20.0  # valve opening, for cooling per valve
+MIN_REST_MINUTES = 60  # fan off for at least this long before comparing supply and mixed air
+
 
 @dataclass(frozen=True)
 class Paths:
