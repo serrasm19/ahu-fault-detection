@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create tag and GitHub Release from CHANGELOG.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(.github/scripts/changelog.sh version)
+          date=$(.github/scripts/changelog.sh date)
+          tag="v$version"
+          echo "Release $tag ($date) on commit $GITHUB_SHA"
+
+          if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "Version $version has no release date in CHANGELOG.md."
+            exit 1
+          fi
+
+          # Same rule as before: never move an existing tag, but allow a rerun on the same commit
+          if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            tagged_commit=$(git rev-list -n 1 "$tag")
+            if [ "$tagged_commit" != "$GITHUB_SHA" ]; then
+              echo "Tag $tag already points to $tagged_commit, not to $GITHUB_SHA."
+              exit 1
+            fi
+            echo "Tag $tag already exists on this commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$tag" "$GITHUB_SHA" -m "Release $tag"
+            git push origin "refs/tags/$tag"
+          fi
+
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "GitHub Release $tag already exists."
+          else
+            .github/scripts/changelog.sh notes > release_notes.md
+            gh release create "$tag" --title "$tag ($date)" --notes-file release_notes.md --verify-tag
+          fi
