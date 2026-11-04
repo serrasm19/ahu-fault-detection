@@ -52,6 +52,20 @@ SHORT_WINDOW_ROWS = 12  # 1 hour
 LONG_WINDOW_ROWS = 36  # 3 hours
 REST_CHECK_KEEP_ROWS = 576  # 48 hours
 
+# Rules baseline: one simple physics rule per fault (notebook 04), on the smoothed signals
+RULES = {
+    "tap_error_c": 2.5,  # supply air off target vs the AHU normal, °C
+    "tap_at_limit": 0.5,  # share of the last hour with the valve command at 0% or 100%
+    "flap_fraction_drop": 0.05,  # outdoor air fraction below the AHU normal by this much
+    "flap_fraction_max": 0.03,  # and almost no outdoor air
+    "bias_offset_c": 1.5,  # check at rest away from the AHU normal, °C
+    "weak_cooling_ratio": 0.8,  # cooling per valve below 80% of the AHU normal
+    "weak_valve_up": 5.0,  # and the valve more open than usual, points
+}
+
+# Post-processing: an alarm must last at least this many fan-on rows (2 hours)
+MIN_ALARM_ROWS = 24
+
 # Faults I found in the data with no work order (notebook 04). Added to the labels for training
 EXTRA_LABELS = (
     {
