@@ -2,7 +2,7 @@
 
 Back to the [project map](00%20-%20Project%20map.md).
 
-Work in progress (phase 1). This note will list each problem found, how I found it, what I did, and what I would ask the client.
+This note lists each data problem I found, how I found it, what I did, and what I would ask the client. The details and charts are in `notebooks/02_data_quality.ipynb`. All fixes run together in `clean_sensors()` (`src/ahu_fdd/data.py`), on train and test.
 
 First look (from `notebooks/01_data_overview.ipynb`). The diary should work like an attendance list: one row per machine every 5 minutes. In train, each building breaks it in its own way, and in the same way for all its machines:
 
@@ -49,4 +49,22 @@ Every hospital (B2) machine misses about 4.9% of its slots. In plain words: the 
 - No hospital fault event falls in that gap, so no label is lost.
 - All other gaps, in every building and in train and test, are 5 or 10 minutes long (about 0.3% of the slots).
 - Decision: I don't fill the 8-day gap (no data to fill it from) or the short gaps. Features will use time-based windows, so a missing slot only means one value less in the window.
+
+## Values I can't trust
+
+Sections 1 to 3 were about rows. Here I look inside the rows.
+
+| Problem | Where | What I did |
+|---|---|---|
+| About 0.2% empty values in fan power, three temperatures and the valve | all buildings, train only | Keep them as NaN |
+| Fan power logged in watts instead of kW (40 instead of 0.04 with the fan off) | B3-AHU-04, 1 to 21 April | Divide by 1,000 (`fix_power_units()`) |
+| CO2 at exactly 0 or 5,000 ppm, the limits of the sensor | B2-AHU-03, 20 Jan to 27 Feb, 781 rows | Set to NaN (`blank_co2_limits()`) |
+| Return air temperature frozen at 23.4 °C for 22 days | B1-AHU-07, 5 to 26 May (train) | Set to NaN (`blank_frozen()`) |
+| Supply air temperature frozen at 13.1 °C for 9 days | B2-AHU-08, 21 to 29 July (test) | Set to NaN (`blank_frozen()`) |
+
+- A frozen sensor: a real temperature always moves a little. Normal sensors never stay at exactly the same value for more than about 1.5 hours. I blank a temperature that stays flat for 6 hours or more.
+- The frozen `sat_c` in test is important: it sits 0.1 °C above its setpoint, so the machine looks perfect on that sensor. It's not one of the four faults, so the model must not raise an alarm there.
+- Fan status, speed, power and static pressure always agree (zero rows break the rules), so the fan status is a reliable filter for the scored rows.
+
+![Frozen sensors](../figures/02_frozen_sensors.png)
 
