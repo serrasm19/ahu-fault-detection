@@ -50,3 +50,19 @@ def coverage_by_building(cov: pd.DataFrame) -> pd.DataFrame:
         )
         .round(2)
     )
+
+
+def gap_blocks(df: pd.DataFrame) -> pd.DataFrame:
+    """One row per run of missing 5-minute slots in each AHU: first and last slot, length."""
+    step = pd.Timedelta(SAMPLING)
+    every_slot = pd.date_range(df["timestamp"].min(), df["timestamp"].max(), freq=step)
+    blocks = []
+    for ahu_id, rows in df.groupby("ahu_id"):
+        missing = pd.Series(every_slot.difference(rows["timestamp"]))
+        # A new block starts when a missing slot does not follow the previous one
+        block_id = (missing.diff() != step).cumsum()
+        runs = missing.groupby(block_id).agg(start="min", end="max", slots="size")
+        blocks.append(runs.assign(ahu_id=ahu_id))
+    out = pd.concat(blocks, ignore_index=True)
+    out["hours"] = out["slots"] * step / pd.Timedelta("1h")
+    return out[["ahu_id", "start", "end", "slots", "hours"]]

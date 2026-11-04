@@ -6,6 +6,7 @@ from ahu_fdd.eda import (
     coverage_per_ahu,
     expected_slots,
     fan_on_hours_per_event,
+    gap_blocks,
 )
 
 
@@ -60,3 +61,19 @@ def test_coverage_by_building_counts_machines_with_duplicates():
     ].tolist() == [2, 1, 1]
     assert summary.loc["B1", "missing_pct_avg"] == 12.5
     assert summary.loc["B3", "machines_with_duplicates"] == 1
+
+
+def test_gap_blocks_groups_consecutive_missing_slots():
+    # AHU-01 misses 00:05 alone and 00:20-00:25 together. AHU-02 has every slot.
+    day = "2025-03-10 "
+    a = _log("B2-AHU-01", [day + t for t in ["00:00", "00:10", "00:15", "00:30"]])
+    b = _log(
+        "B2-AHU-02",
+        [day + t for t in ["00:00", "00:05", "00:10", "00:15", "00:20", "00:25", "00:30"]],
+    )
+    gaps = gap_blocks(pd.concat([a, b]))
+    assert gaps["ahu_id"].tolist() == ["B2-AHU-01", "B2-AHU-01"]
+    assert gaps["slots"].tolist() == [1, 2]
+    assert gaps["start"].dt.strftime("%H:%M").tolist() == ["00:05", "00:20"]
+    assert gaps["end"].dt.strftime("%H:%M").tolist() == ["00:05", "00:25"]
+    assert gaps["hours"].tolist() == [5 / 60, 10 / 60]
