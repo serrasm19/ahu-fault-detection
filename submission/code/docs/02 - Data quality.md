@@ -39,3 +39,14 @@ Every mall (B3) machine has Friday 14 February twice. In plain words: the same p
 - Fix: `merge_duplicates()` in `src/ahu_fdd/data.py` keeps one row per machine and stamp, and fills an empty value in one copy with the value of the other. It recovers the 73 empty values of that day.
 - It runs after `fix_clock_shift()`. Before that fix, the office "duplicates" are two different hours and must not be merged.
 - Result: no duplicates left in any building. 3,452 rows removed in total (3,439 mall copies and 13 ambiguous office rows).
+
+## Hospital data lost for 8 days
+
+Every hospital (B2) machine misses about 4.9% of its slots. In plain words: the diary has a few pages torn out, the same pages in every machine.
+
+- `gap_blocks()` in `src/ahu_fdd/eda.py` joins consecutive missing 5-minute slots into blocks.
+- The hospital has one block of 200 hours (about 8.3 days), from Monday 10 March 06:00 to Tuesday 18 March 13:55 (last missing slot), in all 12 machines at the same time. One sensor would fail in one machine; this hits the whole building, so the BMS or its network stopped saving.
+- No hospital fault event falls in that gap, so no label is lost.
+- All other gaps, in every building and in train and test, are 5 or 10 minutes long (about 0.3% of the slots).
+- Decision: I don't fill the 8-day gap (no data to fill it from) or the short gaps. Features will use time-based windows, so a missing slot only means one value less in the window.
+

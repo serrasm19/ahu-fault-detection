@@ -20,6 +20,7 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 - Plain-language docs for the data tables, the AHU and the four faults, and the first data quality findings.
 - Cleaning step `fix_clock_shift()`: moves the office week stamped 8 hours early (1 to 8 June) to its real time. Notebook `02_data_quality` section 1 proves the shift with the outside temperature of the mall.
 - Cleaning step `merge_duplicates()`: keeps one row per machine and stamp and fills empty values from the other copy (mall day 14 February saved twice). Notebook `02_data_quality` section 2.
+- EDA helper `gap_blocks()`: joins missing 5-minute slots into blocks. Notebook `02_data_quality` section 3 finds one 8-day outage in the hospital (10 to 18 March) and only 5-10 minute gaps elsewhere.
 
 ## [0.1.0] - 2026-11-04
 
