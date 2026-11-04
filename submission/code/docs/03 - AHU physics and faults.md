@@ -95,7 +95,26 @@ Two questions to keep apart:
 
 Some faults can look alike with these sensors. A stuck tap and a weak radiator can both end with "tap very open, air not cold enough". If the data can't separate them, I say it.
 
-To be checked against the labelled events in `notebooks/04_faults.ipynb` (phase 1).
+## What the labelled events show
+
+From `notebooks/04_faults.ipynb`. I compare each event with the healthy rows of the same machine (fan on, after the 30-minute start-up). The signals come from `src/ahu_fdd/features.py`.
+
+In plain words: notebook 03 is the doctor learning your normal temperature, and notebook 04 is learning the symptoms of each illness. The good news is that each fault gives a different symptom, like the flu gives fever and a cold gives a runny nose.
+
+| Plain name | Signal that moves | Typical change | Notes |
+|---|---|---|---|
+| Stuck tap | Supply air error, valve command | +4 to +12 °C (stuck nearly closed) or -4.5 to -5.6 °C (stuck open); command runs to 100% or 0% | 97% of event rows are more than 2 °C off target |
+| Stuck flap | Outdoor air fraction, flap command, CO2 | fraction falls by about 0.10 to almost 0; command +40 points; CO2 +440 to +1,030 ppm | In the mall (no CO2 sensor) only the fraction shows it |
+| Lying thermometer | Offset at rest: supply minus mixed air with the fan off for an hour | normal -0.5 °C; during events +2.0 to +2.4 or -2.5 to -3.2 °C | Invisible with the fan on. Only works on machines that switch off. Seen the first night, so up to a day late |
+| Weak radiator | Valve command, cooling per 100% of valve | valve +8 to +36 points; cooling per valve down by about 6 °C | Supply air stays on target until the valve reaches 100% |
+
+- Stuck tap vs weak radiator: with a stuck tap the supply air is off target almost all the time (97% of the rows); with a weak radiator the controller compensates and the air stays on target in most rows. Everyday example for the weak radiator: an old air conditioner that has to run at full power to cool as much as before.
+- The lying thermometer is the hardest: the controller trusts the sensor, so the reading looks perfect while the machine runs. I check it with the fan off for an hour: with still air, supply and mixed air should read almost the same. Everyday example: to know if a scale lies, you look at it empty. If it shows 2 kg when empty, it lies.
+- Label dates match the data within one hour for the stuck tap and flap. Gaps at the end of office events are weekends.
+- Hard to see: the lying thermometer in 24/7 machines, and the stuck tap or weak radiator in the three machines always at their limit (B1-AHU-05, B3-AHU-02, B3-AHU-09).
+- One fault without a label: B1-AHU-11 has a stuck flap from 22 April (morning) to 30 April. At about 16:00 on 30 April the repair shows in the data: in half an hour the outdoor air comes back and CO2 falls from about 1,860 to 1,020 ppm. A technician fixed it, but there is no work order. I label it for training (otherwise the model learns that a stuck flap is healthy) and ask the client.
+
+![Fault signatures](../figures/04_fault_signatures.png)
 
 ## A bit of physics: the mixing formula
 
