@@ -37,6 +37,39 @@ jobs:
           esac || { echo "PRs into '$BASE' cannot come from '$HEAD'."; exit 1; }
           echo "OK: $HEAD -> $BASE"
 
+  release-check:
+    name: release-check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check CHANGELOG.md format
+        run: |
+          version=$(.github/scripts/changelog.sh version)
+          date=$(.github/scripts/changelog.sh date)
+          if [[ "$date" != "YYYY-MM-DD" && ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "Version $version has an invalid date '$date'. Use YYYY-MM-DD or a real date."
+            exit 1
+          fi
+          echo "OK: version $version ($date)"
+      - name: Check the release is ready (PRs into main only)
+        if: github.base_ref == 'main'
+        run: |
+          version=$(.github/scripts/changelog.sh version)
+          date=$(.github/scripts/changelog.sh date)
+          if [[ "$date" == "YYYY-MM-DD" ]]; then
+            echo "Set the release date of version $version in CHANGELOG.md before releasing to main."
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "Tag v$version already exists. Add a new version to CHANGELOG.md."
+            exit 1
+          fi
+          echo "OK: ready to release v$version ($date)"
+
   lint:
     name: lint
     runs-on: ubuntu-latest
