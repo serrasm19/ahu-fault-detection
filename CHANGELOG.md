@@ -9,13 +9,18 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 ### Added general
 - Latest release link and up-to-date structure in the root README.
 
+### Added modelling
+- Fault injection with simple physics in `simulate.py` (stuck valve, stuck damper, sensor bias, weak coil), with unit tests.
+- The pipeline is split into `fit_pipeline()` and `predict_alarms()`, so a trained pipeline can be reused; `predictions.csv` is unchanged.
+- Fault simulator app in `app/` (Streamlit, own `requirements-app.txt`): inject a fault into a healthy AHU and see the signal, the model confidence and the alarms, scored like the brief.
+
 ### Added report
 - Report sources in `submission/code/report/`, one Markdown file per question, with a page budget per section.
 - Architecture section (Q3): diagram (`report/architecture_diagram.py`, `figures/architecture.png`) and explanation: edge agent, Delta layers with automatic quality checks, MLflow with champion and challenger, hourly inference, alerting rules, monitoring, onboarding in under a week.
 - Architecture note in the docs: flow diagram, mapping from this repository to production, technology choices, edge agent, alerting rules, monitoring and onboarding tables.
 - Architecture: environments with Databricks Asset Bundles, a pass/warn/block data quality gate before inference, automatic closing of alarms and a monitoring dashboard.
 - Client communication section (Q4): reply to the facilities manager and internal note to the project lead, with the reasons behind both in Appendix A.
-- Report sections for Q1 (approach, data quality table, patterns, fault physics against the labels) and the Q2 summary, an "At a glance" box and a map of the submission on page 1, and an appendix with model details, the test alarms, questions for the client, what I would do with more time (cold start first) and how to reproduce.
+- Report sections for Q1 (approach, data quality table, patterns, fault physics against the labels) and the Q2 summary, an "At a glance" box and a map of the submission on page 1, and an appendix with model details, the test alarms, questions for the client, what I would do with more time (cold start first), the fault simulator with an example, and how to reproduce.
 - `report/build.py` builds `submission/report.pdf` in LaTeX (pandoc and tectonic) and checks the 12-page limit. `pypdf` added to `requirements.txt` for the page check.
 
 ## [0.2.0] - 2026-11-05

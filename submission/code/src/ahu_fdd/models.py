@@ -41,6 +41,11 @@ def fit_model(model, train: pd.DataFrame, features: list[str] = MODEL_FEATURES):
     return model.fit(train[features], train["label"])
 
 
+def fault_proba(model, df: pd.DataFrame, features: list[str] = MODEL_FEATURES) -> pd.DataFrame:
+    """Probability of each class (normal and the four faults) for every row."""
+    return pd.DataFrame(model.predict_proba(df[features]), columns=model.classes_, index=df.index)
+
+
 def predict_faults(
     model,
     df: pd.DataFrame,
@@ -49,8 +54,7 @@ def predict_faults(
     features: list[str] = MODEL_FEATURES,
 ) -> pd.Series:
     """Most likely fault per row, or normal if the model is unsure or the AHU is not running."""
-    proba = pd.DataFrame(model.predict_proba(df[features]), columns=model.classes_, index=df.index)
-    faults = proba.drop(columns=NORMAL)
+    faults = fault_proba(model, df, features).drop(columns=NORMAL)
     best = faults.idxmax(axis=1)
     pred = best.where(faults.max(axis=1) >= min_prob, NORMAL)
     # Same rule as everywhere: no alarms with the fan off or during the start-up

@@ -100,7 +100,7 @@ All in one list, from the data work and the design (also in `code/docs/decisions
 In order of what I think would help the client most:
 
 1. **Cold start: a new building with no labels.** Today a new building runs on the physics rules until it has its own confirmed work orders, because the model trained on other buildings found only 50-60% of the faults in a building it never saw. To shorten that time:
-    - **Inject faults into healthy data.** Take a healthy machine of the new building and simulate each fault in its own data (hold the valve, close the damper, add 2 °C to the supply sensor, cut the coil capacity), with a known start and size. The model gets labelled examples from day one, and I can measure the detection delay on each building before going live.
+    - **Inject faults into healthy data.** Take a healthy machine of the new building and simulate each fault in its own data (hold the valve, close the damper, add 2 °C to the supply sensor, cut the coil capacity), with a known start and size. The model gets labelled examples from day one, and I can measure the detection delay on each building before going live. A first version of this is the simulator of Appendix F.
     - **Train on more general signals.** Most features are already relative to each machine; adding the building type and the sensors fitted as features, and training across buildings with more of them, should make the model transfer better.
     - **Ask for the right labels first.** Send the technicians first the alerts where the model is least sure, so each visit teaches the model as much as possible (active learning).
 2. **Sensor bias on 24/7 machines.** The check at rest needs the fan off, so it can't run on the hospital. Options: a short planned stop at night once a week, or a "virtual sensor" that estimates the supply air from the chilled water temperatures and the valve, and compares it with the real sensor.
@@ -111,14 +111,38 @@ In order of what I think would help the client most:
 7. **Use the unlabelled data.** Self-training on very confident alarms, and an automatic check of every work order against its fingerprint, to find missing labels like B1-AHU-11 and wrong dates.
 8. **Production pieces of Question 3 in code.** MLflow with the champion and challenger rule (two gates), a Dockerfile, and the data quality gate (pass, warn, block) as a job.
 
-## F. How to reproduce
+## F. Fault simulator
+
+An interactive app (`code/app/`, Streamlit) to play with the model. Pick a healthy AHU, inject one of the four faults with the size you want, and see if and when an alarm is raised. It uses the same pipeline as `predictions.csv`.
+
+**Run it** from `code/` (it needs the assignment data, like the notebooks):
+
+```bash
+pip install -r app/requirements-app.txt
+streamlit run app/streamlit_app.py
+```
+
+**How to use it.** In the sidebar:
+
+1. **Machine and period:** any of the 40 AHUs and the first of the 14 days shown.
+2. **Fault to inject:** the type, the day it starts, how long it lasts and its size (real valve position, outdoor air left, sensor bias in °C, coil capacity left). "No fault" shows the false alarms on healthy data.
+3. **Alarm settings:** confidence needed, minimum alarm length and gap to join alarms (defaults: the settings of `predictions.csv`).
+
+The page shows if the fault is found, the delay, the type and the false alarms (scored like the brief), and three charts: the signal that shows the fault (healthy and faulty), how sure the model is, and the alarms. Two things worth trying: lower the confidence with "No fault" to see false alarms appear, and shrink a fault to find the smallest one the model still catches.
+
+**How the faults are simulated** (`src/ahu_fdd/simulate.py`, with unit tests): simple physics that reproduces the fingerprints of Section 1.4, not a full model of the unit. A stuck valve stays at the chosen opening, so the coil cools as if it were there and the controller pushes the command to a limit. A stuck damper lets in only part of the outdoor air, so mixed air moves to return air and CO2 rises. A sensor bias moves the reading with the fan off, while the controller hides it with the fan on. A weak coil makes the valve open more, and the air warms once the valve reaches 100%.
+
+![The simulator on B1-AHU-02 (office): the valve stuck at 10% for four days (shaded). The supply air goes 9 °C above its setpoint, the model is sure within the first morning, and one alarm of the right type is raised after 8 hours, with no false alarm.](../figures/simulator_example.png){width=92%}
+
+## G. How to reproduce
 
 From `code/` (details in `code/README.md`):
 
 ```bash
 pip install -r requirements.txt && pip install -e .
 python -m ahu_fdd.predict          # rebuilds predictions.csv and the model card (about 1 minute)
-pytest -q --cov                    # 54 unit tests
+pytest -q --cov                    # unit tests
 python report/build.py             # rebuilds this report (needs pandoc and tectonic)
+streamlit run app/streamlit_app.py # the fault simulator (Appendix F)
 ```
 

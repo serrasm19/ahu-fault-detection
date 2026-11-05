@@ -206,6 +206,10 @@ Every run of `python -m ahu_fdd.predict` saves the trained model and its card in
 
 So every `predictions.csv` can be traced back to the exact model, code and data that made it. This is a small, local version of a model registry: in production the same information goes to MLflow, and a new model (challenger) only replaces the current one (champion) if it beats it on the same validation. See the architecture section of the report.
 
+## Fault simulator
+
+`app/` has a small Streamlit app to play with the model: inject one of the four faults into a healthy AHU, with the size and dates you choose, and see the signal, the model's confidence and the alarms, scored like the brief. The physics of each injected fault is in `src/ahu_fdd/simulate.py` (with tests), and the app uses the same pipeline as `predictions.csv` (`fit_pipeline()` once, then `predict_alarms()`). How to run and use it: `app/README.md` and Appendix F of the report.
+
 ## With more time
 
 - Compare XGBoost and CatBoost, and tune the model with more care.

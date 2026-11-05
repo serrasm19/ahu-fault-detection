@@ -18,6 +18,7 @@ This report answers Questions 1, 3 and 4, with a summary of Question 2. Code, hi
 | `code/README.md` | Start here: setup, how to rebuild `predictions.csv` and this report |
 | `code/notebooks/` | `01`-`04`: data exploration and quality (Q1); `05_modelling`: the model (Q2) |
 | `code/src/ahu_fdd/` | Python package used by the notebooks: cleaning, features, rules, model, scoring, `predict.py` |
-| `code/tests/`, `code/docs/` | 54 unit tests; docs, including the architecture details (Q3) and every decision with its reason |
+| `code/tests/`, `code/docs/` | Unit tests; docs, including the architecture details (Q3) and every decision with its reason |
 | `code/artifacts/`, `code/report/` | Trained model and its model card; the sources of this report |
+| `code/app/` | Optional: an interactive fault simulator to play with the model (Appendix F) |
 

@@ -41,6 +41,15 @@ It cleans the raw data, scores the model on three validation blocks, trains it o
 python ../../assignment/starter/validate_submission.py ../predictions.csv
 ```
 
+## Fault simulator (optional)
+
+A small Streamlit app to inject a fault into a healthy AHU and see if and when the model raises an alarm. Details in [app/README.md](app/README.md).
+
+```bash
+pip install -r app/requirements-app.txt
+streamlit run app/streamlit_app.py
+```
+
 ## Build the report
 
 The report sources are in `report/` (one Markdown file per question). They are turned into `../report.pdf` with LaTeX:
