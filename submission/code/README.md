@@ -7,7 +7,7 @@ Work in progress. The docs start at [docs/00 - Project map.md](docs/00%20-%20Pro
 All the work is also on GitHub: https://github.com/serrasm19/ahu-fault-detection
 
 - Full history: one branch per phase, merged through pull requests with CI checks (lint, tests with at least 75% coverage, branch policy, changelog check).
-- Latest release: [`v0.1.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v0.1.0) (project setup and CI).
+- Latest release: [`v0.2.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v0.2.0) (EDA, data cleaning and the fault detection model, with `predictions.csv`).
 - Changes per version: [`CHANGELOG.md`](https://github.com/serrasm19/ahu-fault-detection/blob/develop/CHANGELOG.md).
 
 ## Setup
