@@ -65,8 +65,29 @@ RULES = {
     "weak_valve_excess": 10.0,  # valve more open than this machine needs for the same work, points
 }
 
+# Model: LightGBM kept small on purpose, because there are only 29 fault events to learn from
+# (shallow trees, many rows per leaf). Class weights handle the imbalance, not fake rows
+LGBM_PARAMS = {
+    "n_estimators": 200,
+    "learning_rate": 0.05,
+    "num_leaves": 15,
+    "max_depth": 4,
+    "min_child_samples": 200,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.8,
+    "class_weight": "balanced",
+    "verbose": -1,
+}
+NORMAL_KEEP_SHARE = 0.1  # share of healthy rows kept for training (they repeat a lot), for speed
+ALARM_MIN_PROB = 0.8  # a row is a fault only if the model is at least this sure
+
 # Post-processing: an alarm must last at least this many fan-on rows (2 hours)
 MIN_ALARM_ROWS = 24
+# Two alarms of one AHU closer than this (fan-on rows, 6 hours) are one alarm. The morning
+# start-up, or hours when a signal can't be computed, must not split a fault that lasts days.
+# Joining alarms never adds alarms, it only joins the ones that are already there
+MAX_GAP_ROWS = 72
 
 # Faults I found in the data with no work order (notebook 04). Added to the labels for training
 EXTRA_LABELS = (
@@ -94,6 +115,8 @@ class Paths:
     # AHU_DATA_DIR lets you point to the data folder of the assignment package
     data_dir: Path = Path(os.environ.get("AHU_DATA_DIR", DEFAULT_DATA_DIR))
     output_dir: Path = CODE_DIR.parent
+    # Trained models and their model cards, one folder per version
+    artifacts_dir: Path = CODE_DIR / "artifacts"
 
     @property
     def train(self) -> Path:
