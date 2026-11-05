@@ -1,7 +1,13 @@
 import pandas as pd
 import pytest
 
-from ahu_fdd.evaluation import month_folds, rows_to_events, score_events
+from ahu_fdd.evaluation import (
+    cross_validate,
+    month_folds,
+    rows_to_events,
+    score_events,
+    summarise,
+)
 
 
 def _rows(preds, fan=None, ahu="B3-AHU-01", start="2025-03-10 09:00"):
@@ -66,3 +72,51 @@ def test_month_folds_cover_each_period_once():
     ts = pd.Series(pd.to_datetime(["2025-01-15", "2025-03-15", "2025-05-15"]))
     folds = month_folds(ts, [("2025-01-01", "2025-03-01"), ("2025-03-01", "2025-07-01")])
     assert [f.tolist() for f in folds] == [[True, False, False], [False, True, True]]
+
+
+def test_summarise_adds_events_and_months_of_all_blocks():
+    block = {
+        "per_event": pd.DataFrame(
+            {"detected": [True, False], "type_right": [True, False], "delay_h": [2.0, None]}
+        ),
+        "false_alarms": 1,
+        "ahu_months": 10.0,
+    }
+    out = summarise([block, block])
+    assert out["events"] == 4
+    assert out["detected"] == 0.5
+    assert out["false_alarms_per_ahu_month"] == 0.1
+
+
+def test_cross_validate_predicts_each_block_with_the_other_ones():
+    # Two blocks of one day each, one event in the second block
+    feats = pd.DataFrame(
+        {
+            "ahu_id": "B3-AHU-01",
+            "timestamp": pd.date_range("2025-03-10 00:00", periods=48, freq="h"),
+            "fan_status": 1,
+        }
+    )
+    labels = pd.DataFrame(
+        {
+            "ahu_id": ["B3-AHU-01"],
+            "fault_type": ["chw_valve_stuck"],
+            "start": [pd.Timestamp("2025-03-11 10:00")],
+            "end": [pd.Timestamp("2025-03-11 14:00")],
+        }
+    )
+    seen_train_rows = []
+
+    def predict(train, block):
+        seen_train_rows.append(len(train))
+        in_event = (block["timestamp"] >= "2025-03-11 10:00") & (
+            block["timestamp"] < "2025-03-11 14:00"
+        )
+        return pd.Series("normal", index=block.index).mask(in_event, "chw_valve_stuck")
+
+    folds = (("2025-03-10", "2025-03-11"), ("2025-03-11", "2025-03-12"))
+    result = cross_validate(feats, labels, predict, folds)
+    assert seen_train_rows == [24, 24]  # each block is predicted by the other one
+    assert result["events"] == 1
+    assert result["detected"] == 1.0
+    assert result["alarms"] == 1

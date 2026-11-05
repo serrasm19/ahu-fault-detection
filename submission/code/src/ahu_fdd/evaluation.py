@@ -1,8 +1,10 @@
 """Event-level scoring, the way the brief describes it, and time-based validation folds."""
 
+from collections.abc import Callable
+
 import pandas as pd
 
-from ahu_fdd.config import NORMAL
+from ahu_fdd.config import FOLDS, NORMAL
 
 DAYS_PER_MONTH = 30.44
 
@@ -58,7 +60,9 @@ def score_events(df: pd.DataFrame, labels: pd.DataFrame, pred_col: str = "pred")
                 "predicted_type": flagged[pred_col].mode().iloc[0] if detected else NORMAL,
             }
         )
-    per_event = pd.DataFrame(per_event)
+    # Named columns, so a block with no events still gives an (empty) table
+    columns = ["ahu_id", "fault_type", "detected", "delay_h", "predicted_type"]
+    per_event = pd.DataFrame(per_event, columns=columns)
     per_event["type_right"] = per_event["predicted_type"] == per_event["fault_type"]
 
     # False alarms: predicted events that don't overlap any true event of the same AHU
@@ -78,6 +82,7 @@ def score_events(df: pd.DataFrame, labels: pd.DataFrame, pred_col: str = "pred")
         "median_delay_h": float(per_event["delay_h"].median()),
         "false_alarms": int(false_alarms),
         "false_alarms_per_ahu_month": false_alarms / ahu_months,
+        "ahu_months": ahu_months,
         "per_event": per_event,
     }
 
@@ -85,3 +90,39 @@ def score_events(df: pd.DataFrame, labels: pd.DataFrame, pred_col: str = "pred")
 def month_folds(timestamps: pd.Series, folds: list[tuple[str, str]]) -> list[pd.Series]:
     """One boolean mask per fold: True for the rows inside [start, end) of that fold."""
     return [(timestamps >= pd.Timestamp(s)) & (timestamps < pd.Timestamp(e)) for s, e in folds]
+
+
+def summarise(scores: list[dict]) -> dict:
+    """Join the scores of several validation blocks into one line (events and months added up)."""
+    per_event = pd.concat([s["per_event"] for s in scores], ignore_index=True)
+    false_alarms = sum(s["false_alarms"] for s in scores)
+    ahu_months = sum(s["ahu_months"] for s in scores)
+    return {
+        "events": len(per_event),
+        "detected": float(per_event["detected"].mean()),
+        "type_right": float(per_event["type_right"].mean()),
+        "median_delay_h": float(per_event["delay_h"].median()),
+        "false_alarms": false_alarms,
+        "false_alarms_per_ahu_month": false_alarms / ahu_months,
+        "per_event": per_event,
+    }
+
+
+def cross_validate(
+    feats: pd.DataFrame,
+    labels: pd.DataFrame,
+    predict: Callable[[pd.DataFrame, pd.DataFrame], pd.Series],
+    folds: tuple[tuple[str, str], ...] = FOLDS,
+) -> dict:
+    """Predict each validation block with `predict(train, block)` and score it by event.
+
+    The events of a block are the ones that start inside it. Also counts every alarm raised.
+    """
+    blocks = month_folds(feats["timestamp"], list(folds))
+    scores, alarms = [], 0
+    for (start, end), in_block in zip(folds, blocks, strict=True):
+        block = feats[in_block].assign(pred=predict(feats[~in_block], feats[in_block]).values)
+        block_labels = labels[(labels["start"] >= start) & (labels["start"] < end)]
+        scores.append(score_events(block, block_labels))
+        alarms += len(rows_to_events(block))
+    return summarise(scores) | {"alarms": alarms}
