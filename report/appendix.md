@@ -6,10 +6,10 @@ Details that don't fit in the 12 pages.
 
 **The reply to the facilities manager.** They are not technical, they are frustrated, and they have to tell the owner something. So I followed five rules:
 
-1. **Agree first, defend later.** Their point is correct: alerts that technicians ignore are worthless. Starting with "you are right" keeps the conversation open.
-2. **No blame on the technicians.** "Nothing found" is often our fault: the alerts didn't say what to check, and some faults can't be seen without the right test (Q1: the lying thermometer is invisible while the machine runs).
+1. **Acknowledge first, defend later.** Their point is correct: alerts that technicians ignore are worthless. Saying so in the first lines, in a professional tone, keeps the conversation open.
+2. **No blame, and no guilt I can't prove yet.** "Nothing found" doesn't always mean "nothing broken": some faults can't be seen without the right test (Q1: the lying thermometer is invisible while the machine runs). Instead of saying whose fault it was, the reply turns this into an action: during the review I send a "what to check" note with each alert. I keep it manual on purpose: turning it into a product feature may be outside the agreed scope, so it goes to the project lead as a possible change request, not as a promise to the client.
 3. **Plain words and one example per idea.** No model, threshold or feature. "A unit that is a bit small for its area" is the healthy machine at its limit of Q1; "a sensor that reads 2 degrees too high" is the lying thermometer.
-4. **Concrete actions with a date,** small enough to do this week: review of the 9 alerts by Wednesday, only high-confidence alerts, "what to check" in each alert, a joint visit.
+4. **Concrete actions with a date,** small enough to do this week and inside the current scope: review of the 9 alerts by Wednesday, only high-confidence alerts, a "what to check" note with each alert, a joint visit.
 5. **Give them a message for the owner** that keeps the owner's timeline but protects the technicians: connect the new buildings next month without alerts, and turn alerts on when a clear target is met. A yes/no answer would put the facilities manager in a bad position.
 
 **The internal note.** Here I can be direct and use numbers. Every hypothesis comes from what I saw in the data:
