@@ -4,10 +4,13 @@ All notable changes to this project are documented in this file.
 
 Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pull request before the release to `main`, which then gets the tag `vX.Y.Z`.
 
-## [1.0.0] - YYYY-MM-DD
+## [1.0.0] - 2026-11-05
 
 ### Added general
 - Latest release link and up-to-date structure in the root README.
+- Final code README: approach, results, assumptions, folder structure and a step-by-step table to run and check everything (also in the docs and in Appendix G of the report).
+- Docs brought up to date with the final code (data flow, commands, model card path).
+- Package version 1.0.0; the model is saved as `artifacts/lgbm-v1.0.0/` with its model card (same predictions).
 
 ### Added modelling
 - Fault injection with simple physics in `simulate.py` (stuck valve, stuck damper, sensor bias, weak coil), with unit tests.
