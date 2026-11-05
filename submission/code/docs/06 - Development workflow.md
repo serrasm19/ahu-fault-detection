@@ -16,6 +16,14 @@ ruff format .
 
 Unit tests use small synthetic data, so they run without the client data, for example in CI.
 
+## Predictions, report and simulator
+
+```bash
+python -m ahu_fdd.predict            # rebuilds ../predictions.csv and the model card (artifacts/)
+python report/build.py               # rebuilds ../report.pdf in LaTeX (needs pandoc and tectonic)
+streamlit run app/streamlit_app.py   # the fault simulator (pip install -r app/requirements-app.txt)
+```
+
 ## Branches
 
 ```text
