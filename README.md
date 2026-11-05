@@ -4,13 +4,15 @@ Fault detection and diagnosis for air handling units (AHUs), from 5-minute build
 
 The client data is not in this repository.
 
+**Latest release:** [`v1.0.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v1.0.0), the final submission (report, code, predictions and the fault simulator).
+
 ## Structure
 
 ```text
 submission/
-├── code/             # Python package, notebooks, tests, docs
-├── report.pdf        # added at the end
-└── predictions.csv   # added at the end
+├── code/             # Python package, notebooks, tests, docs, trained model (artifacts/), report sources (report/)
+├── predictions.csv   # fault type for every row of the test period (python -m ahu_fdd.predict)
+└── report.pdf        # answers to the four questions (python report/build.py)
 ```
 
 How to set up and run the code: [submission/code/README.md](submission/code/README.md).

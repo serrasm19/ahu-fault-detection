@@ -1,6 +1,7 @@
 """Build predictions.csv from the raw data with one command: python -m ahu_fdd.predict"""
 
 import subprocess
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from importlib.metadata import version
 
@@ -52,10 +53,15 @@ def with_deviations(
 
 
 def to_alarms(
-    target: pd.DataFrame, pred: pd.Series, *, max_gap_rows: int = MAX_GAP_ROWS
+    target: pd.DataFrame,
+    pred: pd.Series,
+    *,
+    min_alarm_rows: int = MIN_ALARM_ROWS,
+    max_gap_rows: int = MAX_GAP_ROWS,
 ) -> pd.Series:
     """Row predictions to alarms: drop short ones, join the pieces of one fault, one type each."""
-    pred = drop_short_alarms(target, pred)  # under 2 hours of running: flicker, storms
+    # Under 2 hours of running: flicker, storms
+    pred = drop_short_alarms(target, pred, min_rows=min_alarm_rows)
     # A gap like the morning start-up doesn't split one fault (0 = don't join)
     pred = bridge_short_gaps(target, pred, max_rows=max_gap_rows)
     return one_type_per_alarm(target, pred)
@@ -69,6 +75,67 @@ def rules_predict(
     return to_alarms(target, rule_predictions(target))
 
 
+@dataclass
+class FittedPipeline:
+    """Everything learned from the training data: each machine's normal and the model."""
+
+    model: object
+    baselines: pd.DataFrame
+    curve: pd.Series
+    features: list[str]
+
+    def deviations(self, target: pd.DataFrame) -> pd.DataFrame:
+        """Compare target rows (from add_features) with each machine's normal."""
+        return add_deviations(target, self.baselines, self.curve)
+
+
+def fit_pipeline(
+    train: pd.DataFrame,
+    *,
+    model=None,
+    target_normal: pd.DataFrame | None = None,
+    features: list[str] = MODEL_FEATURES,
+) -> FittedPipeline:
+    """Learn each machine's normal from healthy rows and fit the model on labelled `train` rows.
+
+    `target_normal` is for machines with no labelled history (a new AHU or building): their
+    normal is taken from these rows (for example their first two weeks), all treated as healthy.
+    """
+    normal_rows = train
+    if target_normal is not None:
+        normal_rows = pd.concat([train, target_normal.assign(label=NORMAL)])
+    baselines, curve = ahu_baselines(normal_rows), valve_curve(normal_rows)
+    train = add_deviations(train, baselines, curve)
+    model = build_lgbm() if model is None else model
+    model = fit_model(model, training_rows(train), features)
+    return FittedPipeline(model, baselines, curve, features)
+
+
+def predict_alarms(
+    fitted: FittedPipeline,
+    target: pd.DataFrame,
+    *,
+    rule_types: bool = True,
+    min_prob: float = ALARM_MIN_PROB,
+    min_alarm_rows: int = MIN_ALARM_ROWS,
+    max_gap_rows: int = MAX_GAP_ROWS,
+) -> pd.Series:
+    """Alarms for `target` (from add_features) with a fitted pipeline.
+
+    1. Compare each row with its machine's normal.
+    2. The model says if there is a fault (sure at 80% or more).
+    3. Row predictions become alarms (see to_alarms).
+    4. If `rule_types`, each alarm takes its type from the physics rules when they fire.
+    The alert settings default to config.py; the simulator app lets you change them.
+    """
+    target = fitted.deviations(target)
+    pred = predict_faults(fitted.model, target, min_prob=min_prob, features=fitted.features)
+    pred = to_alarms(target, pred, min_alarm_rows=min_alarm_rows, max_gap_rows=max_gap_rows)
+    if rule_types:
+        pred = type_from_rules(target, pred, rule_predictions(target))
+    return pred
+
+
 def train_and_predict(
     train: pd.DataFrame,
     target: pd.DataFrame,
@@ -80,25 +147,15 @@ def train_and_predict(
     min_prob: float = ALARM_MIN_PROB,
     max_gap_rows: int = MAX_GAP_ROWS,
 ) -> pd.Series:
-    """Fit on labelled `train` rows and predict alarms for `target`, both from add_features.
+    """Fit on labelled `train` rows and predict alarms for `target`, in one call.
 
-    Same steps for validation and for the test period:
-    1. Each machine's normal from healthy rows only (see with_deviations).
-    2. The model says if there is a fault (sure at 80% or more).
-    3. Row predictions become alarms (see to_alarms).
-    4. If `rule_types`, each alarm takes its type from the physics rules when they fire.
-
-    `features`, `min_prob` and `max_gap_rows` are only changed to compare options
-    (notebook 05, "What I tried"); the defaults come from config.py.
+    Used for validation (each block) and in the notebooks. `features`, `min_prob` and
+    `max_gap_rows` are only changed to compare options (notebook 05, "What I tried").
     """
-    train, target = with_deviations(train, target, target_normal)
-    model = build_lgbm() if model is None else model
-    model = fit_model(model, training_rows(train), features)
-    pred = predict_faults(model, target, min_prob=min_prob, features=features)
-    pred = to_alarms(target, pred, max_gap_rows=max_gap_rows)
-    if rule_types:
-        pred = type_from_rules(target, pred, rule_predictions(target))
-    return pred
+    fitted = fit_pipeline(train, model=model, target_normal=target_normal, features=features)
+    return predict_alarms(
+        fitted, target, rule_types=rule_types, min_prob=min_prob, max_gap_rows=max_gap_rows
+    )
 
 
 def to_submission(test_raw: pd.DataFrame, target: pd.DataFrame, pred: pd.Series) -> pd.DataFrame:
@@ -172,15 +229,15 @@ def main(paths: Paths = PATHS) -> pd.DataFrame:
     # Validation score first, so the model card says how good this version is
     validation = cross_validate(train, labels, train_and_predict)
 
-    # Final model on all of January to June (fit in place, so it can be saved after)
-    model = build_lgbm()
-    pred = train_and_predict(train, test, model=model)
+    # Final model on all of January to June
+    fitted = fit_pipeline(train)
+    pred = predict_alarms(fitted, test)
     submission = to_submission(test_raw, test, pred)
     submission.to_csv(paths.predictions, index=False)
 
     alarms = len(rows_to_events(test.assign(pred=pred.values)))
     card = model_card(train, labels, validation, alarms)
-    folder = save_model(model, card, paths.artifacts_dir / f"lgbm-v{card['version']}")
+    folder = save_model(fitted.model, card, paths.artifacts_dir / f"lgbm-v{card['version']}")
     print(f"Wrote {len(submission):,} rows to {paths.predictions} ({alarms} alarms)")
     print(f"Saved the model and its card to {folder}")
     return submission
