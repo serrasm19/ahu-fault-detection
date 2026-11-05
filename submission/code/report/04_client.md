@@ -24,7 +24,7 @@ Two small things would help me a lot: the notes from the 4 visits, and for each 
 
 Could we have a 30-minute call on Monday?
 
-Best regards,
+Best regards,\
 Sergio
 
 ## 4.2 Internal note to the project lead

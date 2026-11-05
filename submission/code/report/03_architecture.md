@@ -1,8 +1,8 @@
 # 3. System architecture
 
-The goal is to run the model of Question 2 for 25 buildings (about 600 AHUs) in the first year, and to send the technicians work orders they can trust. I chose **Azure with Databricks**: the buildings already run Windows and SQL Server, and it is the stack I used in production for a similar ML system (Delta tables, scheduled jobs, MLflow with a champion model). The lighter option, containers with Parquet files and a managed MLflow, would also work and cost less; I would pick it if the client has no Azure.
+The goal is to run the model of Question 2 for 25 buildings (about 600 AHUs) in the first year, and to send the technicians work orders they can trust. I chose **Azure with Databricks**: the buildings already run Windows and SQL Server, and it is the stack I used in production for a similar ML system (Delta tables, scheduled jobs, MLflow with a champion model). The lighter option, containers with Parquet files and a managed MLflow, would also work and cost less; I would pick it if the client has no Azure. More detail (technology choices, alert rules, monitoring thresholds, onboarding plan) in `code/docs/05 - Architecture.md`.
 
-![Architecture](../submission/code/figures/architecture.png)
+![From the BMS to a work order, and back as labels.](../figures/architecture.png){width=95%}
 
 ## Data ingestion and storage
 
@@ -20,14 +20,14 @@ The goal is to run the model of Question 2 for 25 buildings (about 600 AHUs) in 
 
 ## Inference strategy
 
-**Every hour, per building.** Faults last days, an alarm needs at least 2 hours of evidence, and the lying thermometer can only be checked at night with the fan off. Every 5 minutes would cost more and gain minutes that don't matter for a visit the next day. Each run uses the last 48 hours of data, so the rolling features are complete.
+**Every hour, per building.** Faults last days, an alarm needs at least 2 hours of evidence, and a supply air sensor bias can only be checked at night with the fan off. Every 5 minutes would cost more and gain minutes that don't matter for a visit the next day. Each run uses the last 48 hours of data, so the rolling features are complete.
 
 ## Alerting and integration
 
 The alert service turns predictions into work orders, and its job is to protect the technicians' trust:
 
 - **One alarm per fault:** the pieces of the same fault are joined (the morning start-up doesn't split it) and an open alarm is updated, not repeated. It **closes** by itself after 24 hours of running back to normal, with a note on the work order, so old alarms don't stay open.
-- **Severity by type and building:** a stuck tap or a weak radiator wastes energy and comfort now (high); a lying thermometer or a stuck flap can usually wait a few days (medium), except a stuck flap in the hospital, where fresh air matters for patients (high).
+- **Severity by type and building:** a stuck valve or low coil capacity wastes energy and comfort now (high); a sensor bias or a stuck damper can usually wait a few days (medium), except a stuck damper in the hospital, where fresh air matters for patients (high).
 - **Suppression:** after "no fault found", the same fault on the same AHU is silenced for 14 days, unless the signal gets clearly worse.
 - **Work order:** created through the CMMS REST API, with the evidence: a small chart of the signals that triggered it and the plain fault name, so the technician knows what to check first.
 - **Feedback:** the outcome of each order flows back as a label (see above).
