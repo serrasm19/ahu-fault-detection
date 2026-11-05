@@ -10,3 +10,5 @@ ipykernel==7.4.0
 pytest==9.2.0
 pytest-cov==7.1.0
 ruff==0.17.3
+# Report build only (python report/build.py also needs pandoc and tectonic)
+pypdf==6.1.3

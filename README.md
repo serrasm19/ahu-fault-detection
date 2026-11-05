@@ -10,9 +10,9 @@ The client data is not in this repository.
 
 ```text
 submission/
-├── code/             # Python package, notebooks, tests, docs, trained model (artifacts/)
+├── code/             # Python package, notebooks, tests, docs, trained model (artifacts/), report sources (report/)
 ├── predictions.csv   # fault type for every row of the test period (python -m ahu_fdd.predict)
-└── report.pdf        # added at the end
+└── report.pdf        # answers to the four questions (python report/build.py)
 ```
 
 How to set up and run the code: [submission/code/README.md](submission/code/README.md).

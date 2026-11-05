@@ -34,5 +34,6 @@ To rebuild `predictions.csv` without the notebooks: `python -m ahu_fdd.predict`.
 - Notebooks: `notebooks/` (table above)
 - Report figures: `figures/`
 - Trained model and its model card: `artifacts/`
+- Report sources (one Markdown file per question) and the LaTeX build: `report/`, writes `../report.pdf`
 - Tests: `tests/unit/`
 - Changes per version: `CHANGELOG.md` at the root of the repository
