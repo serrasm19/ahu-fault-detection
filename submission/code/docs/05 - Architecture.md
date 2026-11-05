@@ -54,6 +54,22 @@ Most pieces already exist here in a small form. Production is mostly the same co
 | Hourly batch inference | Faults last days, alarms need 2 hours, the lying thermometer only shows at night | Streaming every 5 minutes: more cost, no real gain for a visit the next day |
 | LightGBM + physics rules | Results of Question 2: fewest false alarms and right fault type | See `04 - Modelling.md` |
 
+## Environments and deployment
+
+The same branch flow as this repository: `feature/*` into `develop`, then `qa`, then `main`. Each branch is deployed with Databricks Asset Bundles to its workspace (dev, QA, production). Each environment trains its own model on its own data and has its own registry; models are never copied from one environment to another, only code moves. A release to production is a tag, like `v0.2.0` here.
+
+## Data quality gate
+
+Every building's batch gets a result before inference: **pass**, **warn** or **block**.
+
+| Result | Example | What happens |
+|---|---|---|
+| Pass | Normal data | Inference and alerts as usual |
+| Warn | A few frozen sensors, a short gap | Inference runs; the affected signals are empty; a "sensor issue" ticket |
+| Block | Clock shifted, half the rows missing, wrong units on most AHUs | No new alerts for that building until the data is fixed; ticket to the site IT contact |
+
+Bad data must never become a false alarm. In my last project this gate was the top item left for later; here it is part of the first version.
+
 ## Edge agent
 
 - Reads only the new rows (a "last timestamp" watermark per table), every 15 minutes.
@@ -73,6 +89,7 @@ Most pieces already exist here in a small form. Production is mostly the same co
 | Suppression | 14 days after "no fault found", same AHU and fault | Don't send the technician twice for the same thing |
 | Severity | high: stuck tap, weak radiator, stuck flap in the hospital; medium: lying thermometer, other stuck flaps | Energy and comfort now vs can wait a few days |
 | Sensor issues | separate ticket type | A frozen or missing sensor is not one of the four faults (notebook 02) |
+| Closing | after 24 hours of running back to normal, with a note on the work order | Old alarms must not stay open (another lesson from my last project) |
 
 ## Monitoring
 
@@ -82,6 +99,8 @@ Most pieces already exist here in a small form. Production is mostly the same co
 | Sensors | frozen sensor (6 hours flat), CO2 at the sensor limits, clock shift | "Sensor issue" ticket |
 | Model | alarms per AHU per month above 0.2 (4 times the validation rate), share of "no fault found" above 30%, feature drift | Review the site; raise its threshold; retrain |
 | Jobs | failed or late runs | Alert to the data team |
+
+All of it in one Databricks SQL dashboard, reading from MLflow and the alert tables: champion and challenger versions and their scores, alarms by type and building, share confirmed by technicians, drift of the main features, data gate results.
 
 First month after go-live: two weeks in shadow mode, then alerts with a weekly review with the facilities manager.
 
