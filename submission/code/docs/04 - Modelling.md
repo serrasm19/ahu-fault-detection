@@ -27,14 +27,58 @@ Training labels: the 28 work orders plus the stuck flap of B1-AHU-11 that I foun
 
 ## Features
 
-From the fingerprints of `notebooks/04_faults.ipynb`, in `src/ahu_fdd/features.py`:
+The model uses 19 features (`MODEL_FEATURES` in `src/ahu_fdd/features.py`). Each one comes from the fingerprint of a fault (`notebooks/04_faults.ipynb`) or from how a healthy machine behaves (`notebooks/03_patterns.ipynb`). Here they are grouped by what they are for.
 
-- Smoothed over 1 and 3 hours, so a storm or a single odd reading doesn't count. Start-up rows (first 30 minutes) are left out.
-- Compared with each machine's own normal (`ahu_baselines()`), because machines differ a lot (notebook 03).
-- The last check at rest (supply minus mixed air with the fan off) is carried to the next 48 hours of running, for the lying thermometer.
-- `valve_excess`: how much more the valve is open than this machine usually needs for the same cooling work (fan speed share times °C cooled). This is the weak radiator signal.
+**1. Context: what situation the machine is in.** They don't find faults on their own, but they stop the model from mixing up normal changes with faults.
 
-Why `valve_excess` and not a simple "cooling per % of valve": a valve is not linear, it gives less cooling per % when it is very open. My first rule compared with one fixed value per machine and raised almost one false alarm per machine per week, every hot afternoon. Asking "how much valve does this machine need for this work" fixed it without losing any fault.
+| Feature | What it is | Why |
+|---|---|---|
+| `minutes_on` | Minutes since the fan started | The first 30 minutes look like a fault and are not |
+| `oat_c` | Outside air temperature | When it's hotter, everything works harder |
+| `oat_change_1h` | Change in outside air over the last hour | Catches storms, which move the valve with no fault |
+| `fan_speed_pct` | Fan speed | How much air the machine moves |
+| `chw_valve_cmd_pct` | Valve command now | The "accelerator" of the cooling |
+| `oa_damper_cmd_pct` | Flap command now | How much outdoor air is asked for |
+
+**2. Stuck tap** (`chw_valve_stuck`): **the supply air goes off target and the valve command runs to a limit.**
+
+| Feature | What it is |
+|---|---|
+| `sat_error_1h`, `sat_error_3h` | How far the supply air is from its setpoint, median of the last 1 and 3 hours |
+| `sat_error_dev` | That error compared with this machine's normal (for the three machines always at their limit) |
+| `valve_at_limit_1h` | Share of the last hour with the valve command at 0% or 100% |
+| `valve_1h`, `valve_dev` | Valve command over the last hour, and how much more open than this machine's normal |
+
+**3. Stuck flap** (`oa_damper_stuck`): **no outdoor air comes in and CO2 goes up.**
+
+| Feature | What it is |
+|---|---|
+| `oa_fraction_1h` | Share of outdoor air in the mix (mixing formula), last hour |
+| `oa_fraction_dev` | That share compared with this machine's normal |
+| `damper_dev` | How much more the flap is asked to open than usual (the controller tries to compensate) |
+| `co2_dev` | CO2 above this machine's normal (office and hospital only) |
+
+**4. Weak radiator** (`low_coil_capacity`): **the machine needs more valve for the same work.**
+
+| Feature | What it is |
+|---|---|
+| `valve_excess` | How much more the valve is open than this machine usually needs for the same cooling work (fan speed share times °C cooled), last 3 hours. Like a car with a weak engine: you press the accelerator more to go at the same speed |
+| `cooling_per_valve_3h` | Cooling per % of valve over the last 3 hours. The simple version, kept as support |
+
+Why `valve_excess` and not only "cooling per % of valve": a valve is not linear, it gives less cooling per % when it is very open (on B2-AHU-10, about 35 °C per 100% of valve at 20% open, and 13 °C at 90% open). My first rule compared with one fixed value per machine and raised almost one false alarm per machine per week, every hot afternoon. Asking "how much valve does this machine need for this work" fixed it without losing any fault. In healthy rows the valve is almost never more than 3 points above what it needs; during a weak radiator, about 20 points.
+
+**5. Lying thermometer** (`sat_sensor_bias`): **the check at rest.**
+
+| Feature | What it is |
+|---|---|
+| `rest_offset_dev` | At the last stop (fan off for an hour), how far the supply sensor was from the mixed air sensor, compared with this machine's normal. Kept for 48 hours, so it can be used while the machine runs |
+
+**Three ideas behind all of them:**
+1. Smoothed over 1 to 3 hours, so a storm or a single odd reading doesn't count.
+2. Compared with each machine's own normal (`ahu_baselines()` and `valve_curve()`, built only from healthy rows of the training data), because machines differ a lot.
+3. Start-up rows (first 30 minutes) are left out of the calculations.
+
+Empty values are allowed: no CO2 in the mall (no sensor), no check at rest in the 24/7 machines (they never stop), and the frozen sensor in test (set to empty in notebook 02). LightGBM handles empty values on its own, which is one of the reasons to use it.
 
 ## Rules baseline
 
