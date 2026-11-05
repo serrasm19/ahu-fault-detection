@@ -1,11 +1,11 @@
 {
   "model": "LightGBM, fault type from the physics rules inside each alarm",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "code": {
-    "commit": "9ff33c1",
+    "commit": "795a9e5",
     "uncommitted": false
   },
-  "trained_at": "2026-11-05T00:49:43+00:00",
+  "trained_at": "2026-11-05T12:24:49+00:00",
   "train_period": [
     "2025-01-01 00:00:00",
     "2025-06-30 23:55:00"
