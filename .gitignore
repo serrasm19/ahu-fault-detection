@@ -5,6 +5,7 @@
 !/CHANGELOG.md
 !/.github/
 !/submission/
+!/report/
 
 # Inside submission/, the only csv allowed is the final predictions file
 *.csv
