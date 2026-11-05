@@ -82,8 +82,25 @@ BASELINE_SIGNALS = [
     "co2_ppm",
 ]
 
-# Columns the model uses (built by add_features and add_deviations)
+# Columns the model uses. Only signals compared with each machine's own normal (plus the share
+# of outdoor air): with raw values the model mixed up faults in the three machines that are
+# always at their limit (notebook 03). Tested in notebooks/05_modelling.ipynb
 MODEL_FEATURES = [
+    "sat_error_dev",
+    "valve_dev",
+    "valve_at_limit_1h",
+    "valve_excess",
+    "oa_fraction_1h",
+    "oa_fraction_dev",
+    "damper_dev",
+    "co2_dev",
+    "rest_offset_dev",
+]
+
+
+# Raw and context signals I also tried as model features (notebook 05, "What I tried").
+# Not used by the final model: see the comment on MODEL_FEATURES
+OTHER_FEATURES = [
     "minutes_on",
     "oat_c",
     "oat_change_1h",
@@ -93,16 +110,7 @@ MODEL_FEATURES = [
     "sat_error_1h",
     "sat_error_3h",
     "valve_1h",
-    "valve_at_limit_1h",
-    "oa_fraction_1h",
     "cooling_per_valve_3h",
-    "sat_error_dev",
-    "valve_dev",
-    "oa_fraction_dev",
-    "damper_dev",
-    "co2_dev",
-    "valve_excess",
-    "rest_offset_dev",
 ]
 
 
