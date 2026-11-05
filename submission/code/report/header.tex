@@ -1,0 +1,56 @@
+% Look of the report: added to the LaTeX that pandoc builds from the Markdown sections
+
+% Font: sans serif for a plain, modern look
+\usepackage{fontspec}
+\setmainfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+  ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{lmmono10-regular.otf}[Scale=0.88]
+
+% Colours, the same as the figures
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{2A78D6}
+\definecolor{ink}{HTML}{333333}
+
+% Section titles: coloured and compact
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\color{accent}}{}{0em}{}
+\titleformat{\subsection}{\large\bfseries\color{ink}}{}{0em}{}
+\titlespacing*{\section}{0pt}{10pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Paragraphs: no indent, a small space between them
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+% Lists: compact
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=2pt, parsep=1pt}
+
+% Tables: smaller text and a little more air between rows
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\small}
+\renewcommand{\arraystretch}{1.2}
+
+% Figures: captions small and grey, figures kept close to their text
+\usepackage{caption}
+\captionsetup{font={small,color=ink}, labelfont=bf, skip=4pt}
+\usepackage{float}
+\floatplacement{figure}{H}
+
+% Header and footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{ink}AHU fault detection and diagnosis}
+\fancyhead[R]{\small\color{ink}Sergio Serrano}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Links in the accent colour
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=accent, urlcolor=accent}
+
+% The "At a glance" box on page 1 (see glance.lua)
+\usepackage[most]{tcolorbox}
+\newtcolorbox{glancebox}{colback=accent!5, colframe=accent, boxrule=0.6pt, arc=2pt,
+  left=7pt, right=7pt, top=4pt, bottom=4pt}
