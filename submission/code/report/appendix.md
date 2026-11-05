@@ -134,15 +134,19 @@ The page shows if the fault is found, the delay, the type and the false alarms (
 
 ![The simulator on B1-AHU-02 (office): the valve stuck at 10% for four days (shaded). The supply air goes 9 °C above its setpoint, the model is sure within the first morning, and one alarm of the right type is raised after 8 hours, with no false alarm.](../figures/simulator_example.png){width=92%}
 
-## G. How to reproduce
+## G. How to run and check everything
 
-From `code/` (details in `code/README.md`):
+From `code/`, after `pip install -r requirements.txt` and `pip install -e .` (details in `code/README.md`). About 12 to 15 minutes in total.
 
-```bash
-pip install -r requirements.txt && pip install -e .
-python -m ahu_fdd.predict          # rebuilds predictions.csv and the model card (about 1 minute)
-pytest -q --cov                    # unit tests
-python report/build.py             # rebuilds this report (needs pandoc and tectonic)
-streamlit run app/streamlit_app.py # the fault simulator (Appendix F)
-```
+| Step | Command | Time | What you should see |
+|------------------|-----------------------------------|--------|--------------------------------|
+| Unit tests | `pytest -q --cov` | ~5 s | All pass, coverage about 91% |
+| Lint | `ruff check .` | ~2 s | All checks passed |
+| Train and predict | `python -m ahu_fdd.predict` | ~1 min | 711,994 rows, 14 alarms, model card saved |
+| Check the format | `validate_submission.py ../predictions.csv` | ~5 s | Format is valid |
+| Notebooks 01 to 04 | Run all | ~30-40 s each | No errors |
+| Notebook 05 | Run all | ~6-8 min | No errors, same results as Section 2 |
+| This report | `python report/build.py` | ~25 s | 9 main pages + appendix |
+| Fault simulator | `streamlit run app/streamlit_app.py` | ~30 s | Opens in the browser (Appendix F) |
 
+There is no separate training command: `python -m ahu_fdd.predict` validates, trains the final model on January to June, predicts the test period and saves the model. Run it before notebook 05, whose last section reads `predictions.csv`.

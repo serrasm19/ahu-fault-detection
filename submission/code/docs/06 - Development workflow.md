@@ -16,11 +16,13 @@ ruff format .
 
 Unit tests use small synthetic data, so they run without the client data, for example in CI.
 
-## Predictions, report and simulator
+## How to run and check everything
+
+The step-by-step table (command, time and what you should see for tests, lint, predictions, notebooks, report and simulator) is in the [code README](../README.md#how-to-run-and-check-everything). In short:
 
 ```bash
-python -m ahu_fdd.predict            # rebuilds ../predictions.csv and the model card (artifacts/)
-python report/build.py               # rebuilds ../report.pdf in LaTeX (needs pandoc and tectonic)
+python -m ahu_fdd.predict            # trains and rebuilds ../predictions.csv and the model card (~1 min)
+python report/build.py               # rebuilds ../report.pdf in LaTeX (~25 s, needs pandoc and tectonic)
 streamlit run app/streamlit_app.py   # the fault simulator (pip install -r app/requirements-app.txt)
 ```
 
