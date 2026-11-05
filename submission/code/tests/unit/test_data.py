@@ -3,6 +3,7 @@ import pytest
 
 from ahu_fdd.config import FAULT_TYPES, PATHS, Paths
 from ahu_fdd.data import (
+    add_extra_labels,
     blank_co2_limits,
     blank_frozen,
     clean_sensors,
@@ -225,3 +226,25 @@ def test_clean_sensors_runs_all_steps():
     out = clean_sensors(df)
     assert len(out) == 1
     assert out["co2_ppm"].isna().all()
+
+
+def test_add_extra_labels_appends_parsed_events():
+    labels = pd.DataFrame(
+        {
+            "ahu_id": ["B1-AHU-01"],
+            "fault_type": ["oa_damper_stuck"],
+            "start": [pd.Timestamp("2025-02-10 12:40")],
+            "end": [pd.Timestamp("2025-02-21 17:40")],
+        }
+    )
+    extra = (
+        {
+            "ahu_id": "B1-AHU-11",
+            "fault_type": "oa_damper_stuck",
+            "start": "2025-04-22 07:00",
+            "end": "2025-04-30 16:00",
+        },
+    )
+    out = add_extra_labels(labels, extra)
+    assert out["ahu_id"].tolist() == ["B1-AHU-01", "B1-AHU-11"]
+    assert out["start"].iloc[1] == pd.Timestamp("2025-04-22 07:00")

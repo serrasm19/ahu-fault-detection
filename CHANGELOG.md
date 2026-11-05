@@ -25,6 +25,16 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 - Feature `minutes_since_fan_on()` in the new `features.py`. Notebook `03_patterns`: a normal day, fixed setpoints per machine, start-up, storms, three machines always at their limit, filter drift, train vs test.
 - Physics features in `features.py`: `sat_error()`, `outdoor_air_fraction()`, `cooling_per_valve()`, `sat_offset_at_rest()`. EDA helper `event_vs_normal()`. Notebook `04_faults`: the fingerprint of each fault, label dates vs data, and one stuck flap without a label (B1-AHU-11).
 
+### Added modelling
+- Event-level scorer in `evaluation.py` (detection, delay, type, false alarms per AHU per month) and three validation blocks of about two months.
+- Extra training label for the stuck flap of B1-AHU-11 found in notebook 04 (`EXTRA_LABELS`).
+- Model features in `features.py`: smoothed physics signals, per-AHU baselines and `valve_excess` (valve vs what the machine needs for the same cooling work).
+- Rules baseline in `rules.py` and a filter for alarms shorter than 2 hours in `postprocess.py`. Validation: 100% of events found, 93% right type, 0.20 false alarms per AHU per month.
+- LightGBM model (`models.py`, `lightgbm==4.7.0`) on 9 features compared with each machine's own normal. It decides if there is a fault; the physics rules give the type.
+- Alarm post-processing: one type per alarm, rule types inside model alarms, and joining the pieces of one fault split by short gaps.
+- `python -m ahu_fdd.predict` validates, trains, builds `predictions.csv` from the raw data and saves the model with its model card in `artifacts/lgbm-v<version>/`. Validation: 100% of events found, 93% right type, 10 h median delay, 0.05 false alarms per AHU per month.
+- Notebook `05_modelling`: framing, features, validation, comparison with rules, logistic regression and random forest, the tests behind the final settings (features, threshold, joining alarms), error analysis, new building test, test alarms.
+
 ## [0.1.0] - 2026-11-04
 
 ### Added general

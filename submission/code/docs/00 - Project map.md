@@ -6,17 +6,33 @@ Fault detection and diagnosis for air handling units (AHUs), from 5-minute BMS d
 
 | Note | What it covers | Status |
 |---|---|---|
-| [Data](01%20-%20Data.md) | The four tables, their columns and the sensors in each building | First version |
-| [Data quality](02%20-%20Data%20quality.md) | Problems found in the data and how I handle them | Phase 1 |
-| [AHU physics and faults](03%20-%20AHU%20physics%20and%20faults.md) | How an AHU works and what each fault looks like in the sensors | First version |
-| [Modelling](04%20-%20Modelling.md) | Approach, features, validation and results | Phase 2 |
+| [Data](01%20-%20Data.md) | The four tables, their columns and the sensors in each building | Done |
+| [Data quality](02%20-%20Data%20quality.md) | Problems found in the data and how I handle them | Done |
+| [AHU physics and faults](03%20-%20AHU%20physics%20and%20faults.md) | How an AHU works, what a healthy machine does and what each fault looks like | Done |
+| [Modelling](04%20-%20Modelling.md) | Approach, features, validation, results and the model card | Done |
 | [Architecture](05%20-%20Architecture.md) | How this would run in production | Phase 3 |
 | [Development workflow](06%20-%20Development%20workflow.md) | Setup, tests, CI, branches and releases | Done |
 | [Decisions](decisions.md) | Log of the decisions and assumptions I made | Ongoing |
 
+## Notebooks
+
+Read them in order. Each one starts with its goal and ends with a summary.
+
+| Notebook | Question it answers | Brief |
+|---|---|---|
+| `01_data_overview` | What is in each file, how much data each machine has, when they run, what the labels look like | Q1 |
+| `02_data_quality` | Can I trust the data? The problems found, how I proved them and how I clean them | Q1 |
+| `03_patterns` | What does a healthy machine look like (daily cycle, start-up, storms, machines at their limit, drift)? | Q1 |
+| `04_faults` | How does each fault show in the data, do the labels agree, and is any fault missing a label? | Q1 |
+| `05_modelling` | The model: framing, features, validation, results, error analysis, new machines, test predictions | Q2 |
+
+To rebuild `predictions.csv` without the notebooks: `python -m ahu_fdd.predict`.
+
 ## Where things are
 
 - Code: `src/ahu_fdd/`
-- Notebooks: `notebooks/`
+- Notebooks: `notebooks/` (table above)
+- Report figures: `figures/`
+- Trained model and its model card: `artifacts/`
 - Tests: `tests/unit/`
 - Changes per version: `CHANGELOG.md` at the root of the repository

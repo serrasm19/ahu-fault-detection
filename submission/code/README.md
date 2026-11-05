@@ -29,6 +29,18 @@ The code reads the data from `../../assignment/data/` by default. To use another
 export AHU_DATA_DIR=/path/to/data
 ```
 
+## Build predictions.csv
+
+```bash
+python -m ahu_fdd.predict
+```
+
+It cleans the raw data, scores the model on three validation blocks, trains it on January to June, writes `../predictions.csv` (one row per row of `ahu_test.parquet`) and saves the model with its model card in `artifacts/lgbm-v<version>/`. It takes about one minute. To check the format:
+
+```bash
+python ../../assignment/starter/validate_submission.py ../predictions.csv
+```
+
 ## Tests and lint
 
 ```bash
