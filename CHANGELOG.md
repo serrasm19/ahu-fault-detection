@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pull request before the release to `main`, which then gets the tag `vX.Y.Z`.
 
+## [1.0.0] - YYYY-MM-DD
+
+### Added general
+- Latest release link and up-to-date structure in the root README.
+
+### Added report
+- Report sources in `report/`, one Markdown file per question, with a page budget per section.
+- Architecture section (Q3): diagram (`report/architecture_diagram.py`, `figures/architecture.png`) and explanation: edge agent, Delta layers with automatic quality checks, MLflow with champion and challenger, hourly inference, alerting rules, monitoring, onboarding in under a week.
+- Architecture note in the docs: flow diagram, mapping from this repository to production, technology choices, edge agent, alerting rules, monitoring and onboarding tables.
+
 ## [0.2.0] - 2026-11-05
 
 ### Added general
