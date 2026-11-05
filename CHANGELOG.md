@@ -13,6 +13,7 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 - Report sources in `report/`, one Markdown file per question, with a page budget per section.
 - Architecture section (Q3): diagram (`report/architecture_diagram.py`, `figures/architecture.png`) and explanation: edge agent, Delta layers with automatic quality checks, MLflow with champion and challenger, hourly inference, alerting rules, monitoring, onboarding in under a week.
 - Architecture note in the docs: flow diagram, mapping from this repository to production, technology choices, edge agent, alerting rules, monitoring and onboarding tables.
+- Architecture: environments with Databricks Asset Bundles, a pass/warn/block data quality gate before inference, automatic closing of alarms and a monitoring dashboard.
 
 ## [0.2.0] - 2026-11-05
 
