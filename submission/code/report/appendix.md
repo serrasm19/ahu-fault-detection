@@ -134,6 +134,8 @@ The page shows if the fault is found, the delay, the type and the false alarms (
 
 ![The simulator on B1-AHU-02 (office): the valve stuck at 10% for four days (shaded). The supply air goes 9 °C above its setpoint, the model is sure within the first morning, and one alarm of the right type is raised after 8 hours, with no false alarm.](../figures/simulator_example.png){width=92%}
 
+\newpage
+
 ## G. How to run and check everything
 
 From `code/`, after `pip install -r requirements.txt` and `pip install -e .` (details in `code/README.md`). About 12 to 15 minutes in total.
