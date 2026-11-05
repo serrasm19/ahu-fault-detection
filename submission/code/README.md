@@ -41,6 +41,15 @@ It cleans the raw data, scores the model on three validation blocks, trains it o
 python ../../assignment/starter/validate_submission.py ../predictions.csv
 ```
 
+## Build the report
+
+The report sources are in `report/` (one Markdown file per question). They are turned into `../report.pdf` with LaTeX:
+
+```bash
+brew install pandoc tectonic   # once
+python report/build.py         # writes ../report.pdf and checks the 12-page limit
+```
+
 ## Tests and lint
 
 ```bash

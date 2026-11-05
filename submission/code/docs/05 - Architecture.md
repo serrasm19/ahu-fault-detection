@@ -2,7 +2,7 @@
 
 Back to the [project map](00%20-%20Project%20map.md).
 
-How I would run this in production for 25 buildings (about 600 AHUs) in the first year, growing to 2,000 AHUs. The short version, with the diagram, is section 3 of the report (`report/03_architecture.md` in the repository). This note adds the details that don't fit there.
+How I would run this in production for 25 buildings (about 600 AHUs) in the first year, growing to 2,000 AHUs. The short version, with the diagram, is section 3 of the report (`report/03_architecture.md`, next to this docs folder). This note adds the details that don't fit there.
 
 In plain words: each building has a small "postman" that sends its data out to the cloud every 15 minutes. In the cloud, the data is cleaned, the model looks at it every hour, and if a machine has a fault, a work order goes to the technicians. When the technician closes the order ("fault confirmed" or "no fault found"), that answer goes back to the model as a new example to learn from.
 
