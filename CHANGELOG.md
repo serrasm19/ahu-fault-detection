@@ -4,6 +4,37 @@ All notable changes to this project are documented in this file.
 
 Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pull request before the release to `main`, which then gets the tag `vX.Y.Z`.
 
+## [0.2.0] - 2026-11-05
+
+### Added general
+- Documentation vault in `submission/code/docs/` (Obsidian, normal Markdown links): project map, data, data quality, AHU physics and faults, modelling, architecture, development workflow and decisions log.
+
+### Added DevOps
+- One `feature/*` branch per phase and releases only at milestones (`v0.2.0` model end to end, `v1.0.0` final submission).
+
+### Added data and EDA
+- Data helpers: `add_building()`, `label_rows()` (paints each sensor row with its fault or `normal`), plain fault names in `config.py`.
+- EDA helpers in `eda.py`: coverage per machine and per building (duplicates and missing 5-minute slots), fan-on hours per fault event.
+- Shared plot style and `save_fig()` for report figures.
+- Notebook `01_data_overview`: the four tables, coverage, real schedules, Singapore public holidays, one office week stamped 8 hours early (UTC instead of local time), fault labels and class balance.
+- Plain-language docs for the data tables, the AHU and the four faults, and the first data quality findings.
+- Cleaning step `fix_clock_shift()`: moves the office week stamped 8 hours early (1 to 8 June) to its real time. Notebook `02_data_quality` section 1 proves the shift with the outside temperature of the mall.
+- Cleaning step `merge_duplicates()`: keeps one row per machine and stamp and fills empty values from the other copy (mall day 14 February saved twice). Notebook `02_data_quality` section 2.
+- EDA helper `gap_blocks()`: joins missing 5-minute slots into blocks. Notebook `02_data_quality` section 3 finds one 8-day outage in the hospital (10 to 18 March) and only 5-10 minute gaps elsewhere.
+- Cleaning steps `fix_power_units()` (fan power logged in watts), `blank_co2_limits()` (CO2 glitches) and `blank_frozen()` (frozen temperature sensors), and `clean_sensors()` that runs every fix in order. EDA helper `longest_runs()`. Notebook `02_data_quality` section 4.
+- Feature `minutes_since_fan_on()` in the new `features.py`. Notebook `03_patterns`: a normal day, fixed setpoints per machine, start-up, storms, three machines always at their limit, filter drift, train vs test.
+- Physics features in `features.py`: `sat_error()`, `outdoor_air_fraction()`, `cooling_per_valve()`, `sat_offset_at_rest()`. EDA helper `event_vs_normal()`. Notebook `04_faults`: the fingerprint of each fault, label dates vs data, and one stuck flap without a label (B1-AHU-11).
+
+### Added modelling
+- Event-level scorer in `evaluation.py` (detection, delay, type, false alarms per AHU per month) and three validation blocks of about two months.
+- Extra training label for the stuck flap of B1-AHU-11 found in notebook 04 (`EXTRA_LABELS`).
+- Model features in `features.py`: smoothed physics signals, per-AHU baselines and `valve_excess` (valve vs what the machine needs for the same cooling work).
+- Rules baseline in `rules.py` and a filter for alarms shorter than 2 hours in `postprocess.py`. Validation: 100% of events found, 93% right type, 0.20 false alarms per AHU per month.
+- LightGBM model (`models.py`, `lightgbm==4.7.0`) on 9 features compared with each machine's own normal. It decides if there is a fault; the physics rules give the type.
+- Alarm post-processing: one type per alarm, rule types inside model alarms, and joining the pieces of one fault split by short gaps.
+- `python -m ahu_fdd.predict` validates, trains, builds `predictions.csv` from the raw data and saves the model with its model card in `artifacts/lgbm-v<version>/`. Validation: 100% of events found, 93% right type, 10 h median delay, 0.05 false alarms per AHU per month.
+- Notebook `05_modelling`: framing, features, validation, comparison with rules, logistic regression and random forest, the tests behind the final settings (features, threshold, joining alarms), error analysis, new building test, test alarms.
+
 ## [0.1.0] - 2026-11-04
 
 ### Added general
