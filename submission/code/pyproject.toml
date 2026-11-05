@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ahu-fdd"
-version = "0.1.0"
+version = "0.2.0"
 description = "Fault detection and diagnosis for air handling units"
 requires-python = ">=3.11"
 

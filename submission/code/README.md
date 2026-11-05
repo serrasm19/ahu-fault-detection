@@ -1,6 +1,14 @@
 # AHU fault detection and diagnosis
 
-Work in progress.
+Work in progress. The docs start at [docs/00 - Project map.md](docs/00%20-%20Project%20map.md).
+
+## Repository
+
+All the work is also on GitHub: https://github.com/serrasm19/ahu-fault-detection
+
+- Full history: one branch per phase, merged through pull requests with CI checks (lint, tests with at least 75% coverage, branch policy, changelog check).
+- Latest release: [`v0.2.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v0.2.0) (EDA, data cleaning and the fault detection model, with `predictions.csv`).
+- Changes per version: [`CHANGELOG.md`](https://github.com/serrasm19/ahu-fault-detection/blob/develop/CHANGELOG.md).
 
 ## Setup
 
@@ -19,6 +27,18 @@ The code reads the data from `../../assignment/data/` by default. To use another
 
 ```bash
 export AHU_DATA_DIR=/path/to/data
+```
+
+## Build predictions.csv
+
+```bash
+python -m ahu_fdd.predict
+```
+
+It cleans the raw data, scores the model on three validation blocks, trains it on January to June, writes `../predictions.csv` (one row per row of `ahu_test.parquet`) and saves the model with its model card in `artifacts/lgbm-v<version>/`. It takes about one minute. To check the format:
+
+```bash
+python ../../assignment/starter/validate_submission.py ../predictions.csv
 ```
 
 ## Tests and lint

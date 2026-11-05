@@ -32,5 +32,11 @@ venv/
 .vscode/
 .idea/
 
+# Obsidian local settings
+.obsidian/
+
 # OS
 .DS_Store
+
+# graphify-axet
+.graphify/

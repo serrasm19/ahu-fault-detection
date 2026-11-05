@@ -1,0 +1,55 @@
+{
+  "model": "LightGBM, fault type from the physics rules inside each alarm",
+  "version": "0.2.0",
+  "code": {
+    "commit": "9ff33c1",
+    "uncommitted": false
+  },
+  "trained_at": "2026-11-05T00:49:43+00:00",
+  "train_period": [
+    "2025-01-01 00:00:00",
+    "2025-06-30 23:55:00"
+  ],
+  "fault_events": {
+    "work_orders": 28,
+    "extra_labels": 1
+  },
+  "features": [
+    "sat_error_dev",
+    "valve_dev",
+    "valve_at_limit_1h",
+    "valve_excess",
+    "oa_fraction_1h",
+    "oa_fraction_dev",
+    "damper_dev",
+    "co2_dev",
+    "rest_offset_dev"
+  ],
+  "lgbm_params": {
+    "n_estimators": 200,
+    "learning_rate": 0.05,
+    "num_leaves": 15,
+    "max_depth": 4,
+    "min_child_samples": 200,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.8,
+    "class_weight": "balanced",
+    "verbose": -1
+  },
+  "settings": {
+    "alarm_min_prob": 0.8,
+    "min_alarm_rows": 24,
+    "max_gap_rows": 72,
+    "normal_keep_share": 0.1
+  },
+  "validation": {
+    "scheme": "3 blocks of about 2 months, each predicted by the other two",
+    "events": 29,
+    "detected": 1.0,
+    "right_type": 0.931,
+    "median_delay_h": 9.8,
+    "false_alarms_per_ahu_month": 0.046
+  },
+  "test_alarms": 14
+}
