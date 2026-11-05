@@ -12,7 +12,7 @@ Fault detection and diagnosis for air handling units (AHUs), from 5-minute BMS d
 | [Modelling](04%20-%20Modelling.md) | Approach, features, validation, results and the model card | Done |
 | [Architecture](05%20-%20Architecture.md) | How this would run in production: flow, technology choices, alerting, monitoring, onboarding | Done |
 | [Development workflow](06%20-%20Development%20workflow.md) | Setup, tests, CI, branches and releases | Done |
-| [Decisions](decisions.md) | Log of the decisions and assumptions I made | Ongoing |
+| [Decisions](decisions.md) | Log of the decisions and assumptions I made (38 entries) | Done |
 
 ## Notebooks
 

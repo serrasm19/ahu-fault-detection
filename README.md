@@ -4,7 +4,7 @@ Fault detection and diagnosis for air handling units (AHUs), from 5-minute build
 
 The client data is not in this repository.
 
-**Latest release:** [`v0.2.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v0.2.0) (EDA, data cleaning and the fault detection model, with `predictions.csv`).
+**Latest release:** [`v1.0.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v1.0.0), the final submission (report, code, predictions and the fault simulator).
 
 ## Structure
 

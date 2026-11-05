@@ -39,7 +39,7 @@ Most pieces already exist here in a small form. Production is mostly the same co
 | `clean_sensors()` (notebook 02) | Quality checks in the step from bronze to silver, with a log of what was fixed |
 | `add_features()`, `with_deviations()` | Gold layer job; each AHU's normal recomputed with every training |
 | `evaluation.py` (event-level scorer, time blocks) | The gate a challenger must pass before it becomes champion |
-| `artifacts/lgbm-v0.2.0/` (model + model card) | MLflow run and registered model version, alias `@champion` |
+| `artifacts/lgbm-v<version>/` (model + model card) | MLflow run and registered model version, alias `@champion` |
 | `postprocess.py` (one alarm per fault, joining pieces) | The first steps of the alert service |
 | `rules.py` | The detector for new buildings, before they have their own labels |
 | `EXTRA_LABELS` (the fault I found without a work order) | Labels from the CMMS outcomes, read every day |
@@ -56,7 +56,7 @@ Most pieces already exist here in a small form. Production is mostly the same co
 
 ## Environments and deployment
 
-The same branch flow as this repository: `feature/*` into `develop`, then `qa`, then `main`. Each branch is deployed with Databricks Asset Bundles to its workspace (dev, QA, production). Each environment trains its own model on its own data and has its own registry; models are never copied from one environment to another, only code moves. A release to production is a tag, like `v0.2.0` here.
+The same branch flow as this repository: `feature/*` into `develop`, then `qa`, then `main`. Each branch is deployed with Databricks Asset Bundles to its workspace (dev, QA, production). Each environment trains its own model on its own data and has its own registry; models are never copied from one environment to another, only code moves. A release to production is a tag, like `v0.2.0` or `v1.0.0` here.
 
 ## Data quality gate
 

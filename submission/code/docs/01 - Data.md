@@ -132,39 +132,36 @@ That is what `label_rows()` in `data.py` does: it gives every diary row a label,
 
 ## Data flow: how the data moves through the code
 
-Solid boxes are built. Dashed boxes are planned.
+All steps are built. Each box names the function that does it.
 
 ```mermaid
 flowchart TD
     meta["ID cards<br/>ahu_metadata.csv"] --> lm["Read<br/>load_metadata()"]
-    labf["Repair reports<br/>fault_labels_train.csv"] --> ll["Read<br/>load_labels()"]
+    labf["Repair reports<br/>fault_labels_train.csv"] --> ll["Read<br/>load_labels()<br/>+ add_extra_labels()"]
     trf["Train diary<br/>ahu_train.parquet"] --> ls["Read<br/>load_sensors('train')"]
     tef["Test diary<br/>ahu_test.parquet"] --> lt["Read<br/>load_sensors('test')"]
 
-    ls --> lab["Label every row<br/>label_rows()"]
+    ls --> clean["Clean<br/>clean_sensors()"]
+    lt --> clean
+    clean --> lab["Label every train row<br/>label_rows()"]
     ll --> lab
-    lab --> eda["Analyse<br/>EDA notebooks 01 to 04"]
+    lab --> eda["Analyse<br/>notebooks 01 to 04"]
     lm --> eda
-
-    lab -.-> clean["Clean the data<br/>duplicates, gaps"]
-    lt -.-> clean
-    clean -.-> feat["Build physics clues<br/>(features)"]
-    lm -.-> feat
-    feat -.-> fit["Train the model<br/>(train rows)"]
-    feat -.-> pred["Predict<br/>(test rows)"]
-    fit -.-> pred
-    pred -.-> out["predictions.csv<br/>what I deliver"]
-
-    classDef planned stroke-dasharray: 5 5
-    class clean,feat,fit,pred,out planned
+    clean --> feat["Physics clues<br/>add_features()"]
+    lab --> feat
+    feat --> fit["Learn each machine's normal<br/>and train the model<br/>fit_pipeline()"]
+    feat --> pred["Predict alarms<br/>predict_alarms()"]
+    fit --> pred
+    pred --> out["predictions.csv<br/>what I deliver"]
 ```
 
-1. **Read** the four files (`load_metadata`, `load_sensors`, `load_labels`). Done.
-2. **Label** every train row with its fault or `normal` (`label_rows`). Done.
-3. **Analyse** the data in the notebooks to understand it and find problems. Phase 1, in progress.
-4. **Clean** the data (duplicates, gaps) and **build clues** based on the physics, for example "how close is the mixed air to the room air?", which points to a stuck flap. Phase 2.
-5. **Train** a model on the train data, where I know the answers. Phase 2.
-6. **Predict**: apply the same steps to the test data and write `predictions.csv`. Phase 2.
+1. **Read** the four files (`load_metadata`, `load_sensors`, `load_labels`), and add the fault I found without a work order (`add_extra_labels`, notebook 04).
+2. **Clean** train and test the same way (`clean_sensors`): the shifted office week, the repeated mall day, wrong units, CO2 glitches and frozen sensors (notebook 02).
+3. **Label** every train row with its fault or `normal` (`label_rows`).
+4. **Analyse** the data in notebooks 01 to 04 to understand it and find problems.
+5. **Build clues** based on the physics (`add_features`), for example "how much outdoor air is in the mix?", which points to a stuck flap (notebook 04).
+6. **Train**: learn each machine's normal and fit the model on the train data, where I know the answers (`fit_pipeline`, notebook 05).
+7. **Predict**: apply the same steps to the test data and write `predictions.csv` (`predict_alarms`, `python -m ahu_fdd.predict`).
 
 ## Technical view
 
