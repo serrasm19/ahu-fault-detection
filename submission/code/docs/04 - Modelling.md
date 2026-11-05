@@ -73,7 +73,7 @@ Why `valve_excess` and not only "cooling per % of valve": a valve is not linear,
 |---|---|
 | `rest_offset_dev` (in the model) | At the last stop (fan off for an hour), how far the supply sensor was from the mixed air sensor, compared with this machine's normal. Kept for 48 hours, so it can be used while the machine runs |
 
-**Why only relative features.** I first gave the model all the signals, raw values included (supply air error, valve opening, outside air, fan speed). It got the fault type right in 76% of the events. The three machines that are always at their limit (B1-AHU-05, B3-AHU-02, B3-AHU-09) have raw values that always look like a stuck tap, so the model mixed them up. With only the signals compared with each machine's own normal, the right type went up to 86%, with every fault still found. So the model sees "how far is this machine from its own normal", never "what is the value".
+**Why only relative features.** I first gave the model all the signals, raw values included (supply air error, valve opening, outside air, fan speed). It got the fault type right in 69% of the events (and missed 3 of the 29 faults). The three machines that are always at their limit (B1-AHU-05, B3-AHU-02, B3-AHU-09) have raw values that always look like a stuck tap, so the model mixed them up. With only the signals compared with each machine's own normal, the right type went up to 86%, with every fault still found. So the model sees "how far is this machine from its own normal", never "what is the value".
 
 **Three ideas behind all of them:**
 1. Smoothed over 1 to 3 hours, so a storm or a single odd reading doesn't count.
