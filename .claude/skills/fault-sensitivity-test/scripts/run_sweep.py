@@ -4,6 +4,7 @@ import argparse
 import sys
 
 import pandas as pd
+
 from ahu_fdd.config import FAULT_TYPES
 from ahu_fdd.simulation import load_pipeline, sensitivity_table
 
