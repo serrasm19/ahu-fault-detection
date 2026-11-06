@@ -9,6 +9,7 @@ from pathlib import Path
 CODE = "submission/code"
 DOCS = f"{CODE}/docs"
 ROOT = Path(__file__).resolve().parents[4]
+SKILLS = "../../.claude/skills"  # the path CI uses, from submission/code
 
 # When a file like the left side changes, one of the files on the right should change too
 COMPANIONS = (
@@ -113,6 +114,15 @@ def main() -> int:
             "tests": ("pytest", "-q", "--cov"),
             "ruff check": ("ruff", "check", "."),
             "ruff format": ("ruff", "format", "--check", "."),
+            "ruff check, skills": ("ruff", "check", "--config", "pyproject.toml", SKILLS),
+            "ruff format, skills": (
+                "ruff",
+                "format",
+                "--check",
+                "--config",
+                "pyproject.toml",
+                SKILLS,
+            ),
         }
         for name, command in checks.items():
             passed, last_line = run_tool(*command)
