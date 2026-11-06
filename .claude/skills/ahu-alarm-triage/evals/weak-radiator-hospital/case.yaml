@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: weak-radiator-hospital
+expected_outcome: |
+  The answer is weak radiator (low_coil_capacity), with numbers from the sensors and a useful check on site.

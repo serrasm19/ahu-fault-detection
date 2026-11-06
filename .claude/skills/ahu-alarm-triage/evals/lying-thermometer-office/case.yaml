@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: lying-thermometer-office
+expected_outcome: |
+  The answer is lying thermometer (sat_sensor_bias), with numbers from the sensors and a useful check on site.
