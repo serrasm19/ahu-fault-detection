@@ -33,7 +33,7 @@ Tip: choose "No fault" and lower the confidence to see how false alarms appear; 
 | File | What it does |
 |---|---|
 | `streamlit_app.py` | The page: sidebar, numbers and charts |
-| `simulation.py` | The simulation without the page: load and train once, inject, run the pipeline, score |
+| `src/ahu_fdd/simulation.py` | The simulation without the page: load and train once, inject, run the pipeline, score. It lives in the package because the fault-sensitivity-test skill uses it too |
 | `example_figure.py` | Draws the example of the report (`figures/simulator_example.png`) with the same simulation |
 | `requirements-app.txt` | Streamlit, only needed for the app |
 

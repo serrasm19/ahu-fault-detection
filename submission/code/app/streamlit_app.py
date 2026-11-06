@@ -6,11 +6,11 @@ Run from submission/code/:  streamlit run app/streamlit_app.py
 import altair as alt
 import pandas as pd
 import streamlit as st
-from simulation import WINDOW_DAYS, load_pipeline, simulate
 
 from ahu_fdd.config import ALARM_MIN_PROB, FAULT_NAMES, MAX_GAP_ROWS, MIN_ALARM_ROWS, NORMAL
 from ahu_fdd.plots import FAULT_COLORS
 from ahu_fdd.simulate import FAULT_SIZES
+from ahu_fdd.simulation import WINDOW_DAYS, load_pipeline, simulate
 
 ROWS_PER_HOUR = 12  # 5-minute data
 
@@ -80,7 +80,7 @@ min_prob = st.sidebar.slider("Model confidence needed", 0.5, 0.95, ALARM_MIN_PRO
 min_hours = st.sidebar.slider("Minimum alarm (hours running)", 0.5, 6.0, MIN_ALARM_ROWS / 12, 0.5)
 gap_hours = st.sidebar.slider("Join alarms closer than (hours)", 0.0, 12.0, MAX_GAP_ROWS / 12, 1.0)
 
-# Simulate: inject the fault into this machine's data and run the whole pipeline (simulation.py)
+# Simulate: inject the fault and run the whole pipeline (ahu_fdd/simulation.py)
 result = simulate(
     fitted,
     data,

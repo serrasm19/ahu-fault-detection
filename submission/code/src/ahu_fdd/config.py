@@ -99,6 +99,17 @@ EXTRA_LABELS = (
     },
 )
 
+# Sensitivity test: fault sizes to try, from a small fault to a clear one (simulate.FAULT_SIZES),
+# and where the fault sits in the 14-day window: healthy days first, then the fault
+SENSITIVITY_SIZES = {
+    "chw_valve_stuck": (40, 30, 20, 10, 0),  # real valve position, %
+    "oa_damper_stuck": (40, 30, 20, 10, 0),  # outdoor air left, %
+    "sat_sensor_bias": (0.5, 1.0, 1.5, 2.0, 3.0),  # sensor error, °C
+    "low_coil_capacity": (90, 80, 70, 60, 50),  # capacity left, %
+}
+SENSITIVITY_LEAD_DAYS = 3
+SENSITIVITY_FAULT_DAYS = 7
+
 # Validation: three blocks of about two months. The cuts fall on days with no labelled event
 # in progress, so no event is split between training and validation
 FOLDS = (
