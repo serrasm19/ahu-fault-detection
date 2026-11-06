@@ -8,13 +8,15 @@ I added them after the delivery of v1.0.0, so they are not in the ZIP. They live
 
 ## The skills
 
-| Skill | Use it when | Starts | What it gives you |
-|---|---|---|---|
-| [`ahu-alarm-triage`](../../../.claude/skills/ahu-alarm-triage/SKILL.md) | You want to know what is wrong with a machine | By itself or by hand | A card: diagnosis, confidence, evidence, what to check on site |
-| [`fault-sensitivity-test`](../../../.claude/skills/fault-sensitivity-test/SKILL.md) | You want to know how small a fault the detector can catch | By itself or by hand | A table per fault size: found, delay, right type, false alarms |
-| [`definition-of-done`](../../../.claude/skills/definition-of-done/SKILL.md) | A change is finished and you want to commit it | By itself or by hand | Tests, lint, missing files, and what was not checked |
-| [`notebook-consistency`](../../../.claude/skills/notebook-consistency/SKILL.md) | A notebook was re-run, or results moved | By itself or by hand | Numbers in the text that no output supports |
-| [`release-and-package`](../../../.claude/skills/release-and-package/SKILL.md) | You want to publish a version | Only by hand | A release, and a ZIP tested in a clean folder |
+Two skills help to use the detector, and three keep the project in order.
+
+| Skill | What it does | When to use it | Starts | What it gives you |
+|---|---|---|---|---|
+| [`ahu-alarm-triage`](../../../.claude/skills/ahu-alarm-triage/SKILL.md) | Explains one alarm from the sensor data. It says the likely fault, the confidence and what the technician should check. It can also answer "no clear fault". | When you ask what is wrong with a machine, or want to review an alarm or write a work order. | By itself or by hand | A card: diagnosis, confidence, evidence, what to check on site |
+| [`fault-sensitivity-test`](../../../.claude/skills/fault-sensitivity-test/SKILL.md) | Measures the smallest fault the detector can still find. It injects simulated faults of several sizes into healthy machines and scores each run. | When you ask how sensitive the model is, how long it takes to find a small fault, or if a settings change made detection worse. | By itself or by hand | A table per fault size: found, delay, right type, false alarms |
+| [`definition-of-done`](../../../.claude/skills/definition-of-done/SKILL.md) | Checks that a change is really finished. It runs tests, coverage and lint, and looks for what should have changed too: docs, decisions, changelog, README or the report PDF. | Before a commit or a pull request, or when you ask "did I forget anything?". | By itself or by hand | Tests, lint, missing files, and what was not checked |
+| [`notebook-consistency`](../../../.claude/skills/notebook-consistency/SKILL.md) | Checks that the text of the notebooks and the report agrees with the real results. It looks for numbers that appear in no output, execution errors, cells out of order and missing sections. | After re-running a notebook, after code changes that move the results, or before a release. | By itself or by hand | Numbers in the text that no output supports |
+| [`release-and-package`](../../../.claude/skills/release-and-package/SKILL.md) | Prepares a version and promotes it from `develop` to `qa` and `main`. Then it builds the delivery ZIP and tests it in a clean folder, as a stranger would. | With `/release-and-package <version>`, because it touches protected branches and publishes a tag. It asks for approval before each pull request and never uploads the ZIP for you. | Only by hand | A release, and a ZIP tested in a clean folder |
 
 ## How to use them
 
