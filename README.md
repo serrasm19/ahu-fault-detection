@@ -9,6 +9,7 @@ The client data is not in this repository.
 ## Structure
 
 ```text
+.claude/skills/       # Claude skills, not part of the delivery
 submission/
 ├── code/             # Python package, notebooks, tests, docs, trained model (artifacts/), report sources (report/)
 ├── predictions.csv   # fault type for every row of the test period (python -m ahu_fdd.predict)
@@ -16,6 +17,20 @@ submission/
 ```
 
 How to set up and run the code: [submission/code/README.md](submission/code/README.md).
+
+## Claude skills
+
+`.claude/skills/` holds five project skills: written procedures with scripts that Claude Code follows. They are not part of the delivery.
+
+| Skill | What it does |
+|---|---|
+| `ahu-alarm-triage` | Explains one alarm from the sensors and says what to check on site |
+| `fault-sensitivity-test` | Finds how small a simulated fault the detector can still catch |
+| `definition-of-done` | Checks tests, lint and the files that change together before a commit |
+| `notebook-consistency` | Compares the numbers in notebooks and report with the real outputs |
+| `release-and-package` | Runs a release and tests the ZIP in a clean folder (only starts by hand) |
+
+What each one does, how to use it, the results and the limits: [07 - Claude skills](submission/code/docs/07%20-%20Claude%20skills.md).
 
 ## Branches and CI
 

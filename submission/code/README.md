@@ -36,7 +36,7 @@ On the test period (July and August) the model raises 14 alarms in 40 machines.
 ```text
 code/
 ├── README.md, requirements.txt, pyproject.toml, pytest.ini
-├── src/ahu_fdd/       # the package: config, data cleaning, features, rules, model, scoring, simulate, predict
+├── src/ahu_fdd/       # the package: config, data cleaning, features, rules, model, scoring, simulation, triage, predict
 ├── notebooks/         # 01_data_overview, 02_data_quality, 03_patterns, 04_faults, 05_modelling
 ├── tests/unit/        # unit tests on small synthetic data (no client data needed)
 ├── figures/           # figures of the notebooks and the report
@@ -94,4 +94,5 @@ All the work is also on GitHub: https://github.com/serrasm19/ahu-fault-detection
 
 - Full history: one branch per phase, merged through pull requests with CI checks (lint, tests with at least 75% coverage, branch policy, changelog check).
 - Latest release: [`v1.0.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v1.0.0), the final submission. **The ZIP of this submission matches this release.**
+- Claude skills for alarm triage, sensitivity tests and project checks: `.claude/skills/` in the repository, explained in [`docs/07 - Claude skills.md`](docs/07%20-%20Claude%20skills.md). They came after the delivery, so they are not in the ZIP.
 - Changes per version: [`CHANGELOG.md`](https://github.com/serrasm19/ahu-fault-detection/blob/main/CHANGELOG.md).

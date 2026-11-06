@@ -84,6 +84,10 @@ jobs:
         run: ruff check .
       - name: Format
         run: ruff format --check .
+      - name: Lint and format the skill scripts
+        run: |
+          ruff check --config pyproject.toml ../../.claude/skills
+          ruff format --check --config pyproject.toml ../../.claude/skills
 
   tests:
     name: tests

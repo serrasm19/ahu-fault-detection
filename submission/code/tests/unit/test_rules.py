@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ahu_fdd.rules import rule_predictions
+from ahu_fdd.rules import rule_fires, rule_predictions
 
 COLS = {
     "minutes_on": 60.0,
@@ -45,3 +45,22 @@ def test_no_alarm_during_start_up_and_tap_wins_over_weak_radiator():
         ]
     )
     assert rule_predictions(df).tolist() == ["normal", "chw_valve_stuck"]
+
+
+def test_rule_fires_keeps_every_rule_that_fires_before_the_priorities():
+    df = pd.DataFrame(
+        {
+            "sat_error_dev": [5.0],
+            "valve_at_limit_1h": [1.0],
+            "oa_fraction_dev": [-0.2],
+            "oa_fraction_1h": [0.0],
+            "rest_offset_dev": [0.0],
+            "valve_excess": [0.0],
+            "minutes_on": [60.0],
+        }
+    )
+    fires = rule_fires(df)
+    assert fires.loc[0, "chw_valve_stuck"]
+    assert fires.loc[0, "oa_damper_stuck"]
+    assert not fires.loc[0, "sat_sensor_bias"]
+    assert rule_predictions(df).iloc[0] == "chw_valve_stuck"

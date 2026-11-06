@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file.
 
 Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pull request before the release to `main`, which then gets the tag `vX.Y.Z`.
 
+## [1.1.0] - YYYY-MM-DD
+
+### Added Claude skills
+- Five project skills in `.claude/skills/`: `ahu-alarm-triage`, `fault-sensitivity-test`, `definition-of-done`, `notebook-consistency` and `release-and-package` (this one only starts by hand).
+- Evaluation cases for `ahu-alarm-triage` in `evals/`: six real cases, with and without the skill.
+- New docs note `07 - Claude skills.md`: what each skill does, how to use it, the results and the limits.
+
+### Added modelling
+- `triage.py`: the evidence for one alarm from the sensors and the rules, and the list of alarms in `predictions.csv`.
+- `sensitivity_table()`: one fault at several sizes on one AHU, with a control run with no fault.
+- `simulation.py` moved from `app/` to the package, so the app and the skill score a simulation in the same way. `rule_fires()` split out of `rule_predictions()`. `predictions.csv` is unchanged.
+
+### Added DevOps
+- `.gitignore` allows `.claude/skills/` and keeps the other local Claude settings out.
+- CI lint also covers the skill scripts. New tests check their logic and each `SKILL.md`, and are skipped in the ZIP.
+
 ## [1.0.0] - 2026-11-05
 
 ### Added general

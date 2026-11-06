@@ -1,14 +1,23 @@
-"""The simulation behind the app: inject a fault into one AHU and run the whole pipeline.
+"""Inject a fault into one AHU and run the whole pipeline, once or for several fault sizes.
 
-Kept apart from the Streamlit page, so the same code also draws the example in the report
-(example_figure.py).
+Used by the fault simulator app (app/), the example figure of the report and the
+fault-sensitivity-test skill, so all of them score a simulation in the same way.
 """
 
 from dataclasses import dataclass
 
 import pandas as pd
 
-from ahu_fdd.config import NORMAL, STARTUP_MINUTES
+from ahu_fdd.config import (
+    ALARM_MIN_PROB,
+    MAX_GAP_ROWS,
+    MIN_ALARM_ROWS,
+    NORMAL,
+    SENSITIVITY_FAULT_DAYS,
+    SENSITIVITY_LEAD_DAYS,
+    SENSITIVITY_SIZES,
+    STARTUP_MINUTES,
+)
 from ahu_fdd.data import add_extra_labels, clean_sensors, label_rows, load_labels, load_sensors
 from ahu_fdd.evaluation import rows_to_events
 from ahu_fdd.features import add_features
@@ -16,7 +25,7 @@ from ahu_fdd.models import fault_proba
 from ahu_fdd.predict import FittedPipeline, fit_pipeline, predict_alarms
 from ahu_fdd.simulate import inject_fault
 
-WINDOW_DAYS = 14  # days shown
+WINDOW_DAYS = 14  # days shown or scored
 HISTORY_DAYS = 2  # extra days before the window, so the rolling features are complete
 
 
@@ -99,3 +108,51 @@ def simulate(
         main_type=caught["fault_type"].mode().iloc[0] if detected else None,
         false_alarms=len(events) - len(caught),
     )
+
+
+def sensitivity_table(
+    fitted: FittedPipeline,
+    data: pd.DataFrame,
+    *,
+    ahu_id: str,
+    fault: str,
+    window_start: pd.Timestamp,
+    sizes: tuple[float, ...] | None = None,
+) -> pd.DataFrame:
+    """One row per fault size on one AHU: found, delay, right type, false alarms.
+
+    The first row is a control with no fault. If it has an alarm, the window was not healthy
+    and the other rows can't be trusted.
+    """
+    fault_start = window_start + pd.Timedelta(days=SENSITIVITY_LEAD_DAYS)
+    fault_end = fault_start + pd.Timedelta(days=SENSITIVITY_FAULT_DAYS)
+    sizes = SENSITIVITY_SIZES[fault] if sizes is None else sizes
+
+    rows = []
+    for name, size in [(NORMAL, float("nan")), *((fault, size) for size in sizes)]:
+        result = simulate(
+            fitted,
+            data,
+            ahu_id=ahu_id,
+            window_start=window_start,
+            fault=name,
+            fault_start=fault_start,
+            fault_end=fault_end,
+            size=size,
+            min_prob=ALARM_MIN_PROB,
+            min_alarm_rows=MIN_ALARM_ROWS,
+            max_gap_rows=MAX_GAP_ROWS,
+        )
+        rows.append(
+            {
+                "ahu_id": ahu_id,
+                "fault": name,
+                "size": size,
+                "detected": result.detected,
+                "delay_h": result.delay_h,
+                "predicted_type": result.main_type,
+                "right_type": result.main_type == fault,
+                "false_alarms": result.false_alarms,
+            }
+        )
+    return pd.DataFrame(rows)

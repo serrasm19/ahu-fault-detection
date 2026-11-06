@@ -1,15 +1,15 @@
 """Draw one simulator example for the report: python app/example_figure.py (from code/)
 
-Same simulation as the app (simulation.py): a stuck valve injected into a healthy office AHU.
+Same simulation as the app (ahu_fdd/simulation.py): a stuck valve in a healthy office AHU.
 """
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
-from simulation import load_pipeline, simulate
 
 from ahu_fdd.config import ALARM_MIN_PROB, FAULT_NAMES, MAX_GAP_ROWS, MIN_ALARM_ROWS
 from ahu_fdd.plots import FAULT_COLORS, save_fig, set_style
+from ahu_fdd.simulation import load_pipeline, simulate
 
 # The example: B1-AHU-02 (office), valve stuck at 10% for 4 days from Wednesday 9 July
 AHU, WINDOW_START = "B1-AHU-02", pd.Timestamp("2025-07-07")
