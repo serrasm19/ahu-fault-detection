@@ -210,6 +210,26 @@ So every `predictions.csv` can be traced back to the exact model, code and data 
 
 `app/` has a small Streamlit app to play with the model: inject one of the four faults into a healthy AHU, with the size and dates you choose, and see the signal, the model's confidence and the alarms, scored like the brief. The physics of each injected fault is in `src/ahu_fdd/simulate.py` (with tests), and the app uses the same pipeline as `predictions.csv` (`fit_pipeline()` once, then `predict_alarms()`). How to run and use it: `app/README.md` and Appendix F of the report.
 
+## How small a fault can it catch?
+
+The labelled events only show the sizes that happened. So I add simulated faults to healthy machines, from small to clear, with `sensitivity_table()` in `src/ahu_fdd/simulation.py`. It is like testing a smoke alarm with more and more smoke. The test runs 14 days from Monday 4 August: 3 healthy days, then 7 days of fault. The model never saw these months. Each machine also has a control run with no fault, and all of them were clean.
+
+| Fault | Size | B1-AHU-02 (office) | B2-AHU-03 (hospital, 24/7) | B3-AHU-07 (mall) |
+|---|---|---|---|---|
+| Stuck tap (`chw_valve_stuck`) | Real valve position, 0 to 40% | From 30% | All sizes | All sizes |
+| Stuck flap (`oa_damper_stuck`) | Outdoor air left, 0 to 40% | All sizes | All sizes | All sizes |
+| Weak radiator (`low_coil_capacity`) | Capacity left, 90 to 50% | All sizes, 128 h late at 90% | From 80% | From 70% |
+| Lying thermometer (`sat_sensor_bias`), too high | 0.5 to 3 °C | From 1 °C | Only 3 °C, wrong type | From 1.5 °C, right type from 2 °C |
+| Lying thermometer (`sat_sensor_bias`), too low | -0.5 to -3 °C | From -1.5 °C | None | From -1 °C |
+
+What I learn from it:
+
+- The stuck flap is found at every size I tried. The stuck tap is too, except a valve stuck at 40% on the office machine.
+- The hospital machine shows the blind spot in numbers: it never stops, so there is no check at rest, and a lying thermometer stays hidden. This agrees with notebook 04 and with Appendix E of the report.
+- The small weak radiator is the slow case. With 10% of capacity lost, one machine needed 128 hours and two were not found.
+
+Limits: three machines, one window, and simple simulated physics. The faults start at once, and on the 24/7 machine the alarm can start in the first hour. A real fault that grows slowly would take longer. This is a guide, not a measured detection limit.
+
 ## With more time
 
 - Compare XGBoost and CatBoost, and tune the model with more care.
