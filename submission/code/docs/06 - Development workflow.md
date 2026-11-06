@@ -42,7 +42,7 @@ feature/*  ->  develop  ->  qa  ->  main
 |---|---|
 | `branch-policy` | `develop` only takes `feature/*`, `qa` only takes `develop`, `main` only takes `qa` |
 | `release-check` | `CHANGELOG.md` has a valid version heading. Into `main`: the date is set and the version is new |
-| `lint` | `ruff check` and `ruff format --check` |
+| `lint` | `ruff check` and `ruff format --check`, on the code and on the skill scripts |
 | `tests` | pytest with at least 75% coverage |
 
 ## Releases
@@ -51,6 +51,10 @@ feature/*  ->  develop  ->  qa  ->  main
 - Releases only at real milestones: `v0.1.0` setup and CI, `v0.2.0` when the model builds the predictions end to end, `v1.0.0` final submission.
 - To release, a `feature/release-X.Y.Z` branch sets the date, then `develop` → `qa` → `main`.
 - On `main`, the `release` workflow creates the tag `vX.Y.Z` and a GitHub Release with the changelog notes. It never moves an existing tag.
+
+## Skills for this workflow
+
+Two steps of this workflow have a skill, so they are not done from memory. `definition-of-done` checks a change before a commit, and `release-and-package` runs a release and tests the ZIP in a clean folder. See [Claude skills](07%20-%20Claude%20skills.md).
 
 ## Docs
 
