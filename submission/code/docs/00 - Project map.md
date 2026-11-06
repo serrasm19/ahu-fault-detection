@@ -12,7 +12,8 @@ Fault detection and diagnosis for air handling units (AHUs), from 5-minute BMS d
 | [Modelling](04%20-%20Modelling.md) | Approach, features, validation, results and the model card | Done |
 | [Architecture](05%20-%20Architecture.md) | How this would run in production: flow, technology choices, alerting, monitoring, onboarding | Done |
 | [Development workflow](06%20-%20Development%20workflow.md) | Setup, tests, CI, branches and releases | Done |
-| [Decisions](decisions.md) | Log of the decisions and assumptions I made (38 entries) | Done |
+| [Claude skills](07%20-%20Claude%20skills.md) | The five skills of this project: what each one does, how to use it, results and limits | Done |
+| [Decisions](decisions.md) | Log of the decisions and assumptions I made (42 entries) | Done |
 
 ## Notebooks
 
@@ -36,5 +37,6 @@ To rebuild `predictions.csv` without the notebooks: `python -m ahu_fdd.predict`.
 - Trained model and its model card: `artifacts/`
 - Report sources (one Markdown file per question) and the LaTeX build: `report/`, writes `../report.pdf`
 - Fault simulator (Streamlit app, optional): `app/`, with its own README
+- Claude skills: `.claude/skills/` at the root of the repository (not in the ZIP)
 - Tests: `tests/unit/`
 - Changes per version: `CHANGELOG.md` at the root of the repository
