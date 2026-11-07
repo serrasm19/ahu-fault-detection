@@ -2,25 +2,25 @@
 
 Fault detection and diagnosis for air handling units (AHUs), from 5-minute building management system (BMS) data. The model finds faults such as a stuck chilled-water valve or a biased supply air sensor, and says which type they are.
 
-The client data is not in this repository.
+This is a personal project. The sample data is not in this repository.
 
-**Latest release:** [`v1.0.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v1.0.0), the final submission (report, code, predictions and the fault simulator).
+**Latest release:** [`v1.0.0`](https://github.com/serrasm19/ahu-fault-detection/releases/tag/v1.0.0), with the report, code, predictions and the fault simulator.
 
 ## Structure
 
 ```text
-.claude/skills/       # Claude skills, not part of the delivery
-submission/
+.claude/skills/       # Claude skills
+project/
 ├── code/             # Python package, notebooks, tests, docs, trained model (artifacts/), report sources (report/)
 ├── predictions.csv   # fault type for every row of the test period (python -m ahu_fdd.predict)
 └── report.pdf        # answers to the four questions (python report/build.py)
 ```
 
-How to set up and run the code: [submission/code/README.md](submission/code/README.md).
+How to set up and run the code: [project/code/README.md](project/code/README.md).
 
 ## Claude skills
 
-`.claude/skills/` holds five project skills: written procedures with scripts that Claude Code follows. They are not part of the delivery.
+`.claude/skills/` holds five project skills: written procedures with scripts that Claude Code follows.
 
 | Skill | What it does |
 |---|---|
@@ -30,7 +30,7 @@ How to set up and run the code: [submission/code/README.md](submission/code/READ
 | `notebook-consistency` | Compares the numbers in notebooks and report with the real outputs |
 | `release-and-package` | Runs a release and tests the ZIP in a clean folder (only starts by hand) |
 
-What each one does, how to use it, the results and the limits: [07 - Claude skills](submission/code/docs/07%20-%20Claude%20skills.md).
+What each one does, how to use it, the results and the limits: [07 - Claude skills](project/code/docs/07%20-%20Claude%20skills.md).
 
 ## Branches and CI
 

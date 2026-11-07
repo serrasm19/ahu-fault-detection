@@ -1,6 +1,6 @@
 ---
 name: release-and-package
-description: Prepare a project release, promote it from develop to qa to main, and build and test the delivery ZIP in a clean folder.
+description: Prepare a project release, promote it from develop to qa to main, and build and test the project ZIP in a clean folder.
 disable-model-invocation: true
 ---
 
@@ -15,8 +15,8 @@ Stop and ask before each step marked **ask**. An approval for one step doesn't c
 1. Start from an up-to-date `develop`, then create `feature/release-<version>`.
 2. Update these files:
    - `CHANGELOG.md`: put the real date on the current version.
-   - `submission/code/pyproject.toml`: set the version, then run `pip install -e submission/code` so the package reports it.
-   - `README.md` and `submission/code/README.md`: update the "Latest release" link.
+   - `project/code/pyproject.toml`: set the version, then run `pip install -e project/code` so the package reports it.
+   - `README.md` and `project/code/README.md`: update the "Latest release" link.
 3. Rebuild the model card, so it shows the new version: `python -m ahu_fdd.predict`. Compare `predictions.csv` with the old one. If it changed and that was not planned, stop and tell the user.
 4. Run `definition-of-done`, and `notebook-consistency` if notebooks or results changed.
 5. Run the preflight. Every line must say `OK`:
@@ -42,10 +42,10 @@ Then check that the `release` workflow ran, that the tag `v<version>` points to 
 Build the ZIP from `main` and test it as a stranger would: a clean folder, a new environment, only the ZIP and the data. This takes about 5 minutes, so run it in the background.
 
 ```bash
-bash .claude/skills/release-and-package/scripts/clean_check.sh origin/main SergioSerrano_DataScientist_VentureSEA.zip
+bash .claude/skills/release-and-package/scripts/clean_check.sh origin/main ahu-fault-detection-<version>.zip
 ```
 
-It needs `AHU_DATA_DIR` if the data is not in `assignment/data/`. It stops at the first failure.
+It needs `AHU_DATA_DIR` if the data is not in `data/`. It stops at the first failure.
 
 ## 4. Report
 

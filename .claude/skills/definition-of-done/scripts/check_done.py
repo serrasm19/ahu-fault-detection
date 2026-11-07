@@ -6,10 +6,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-CODE = "submission/code"
+CODE = "project/code"
 DOCS = f"{CODE}/docs"
 ROOT = Path(__file__).resolve().parents[4]
-SKILLS = "../../.claude/skills"  # the path CI uses, from submission/code
+SKILLS = "../../.claude/skills"  # the path CI uses, from project/code
 
 # When a file like the left side changes, one of the files on the right should change too
 COMPANIONS = (
@@ -23,7 +23,7 @@ COMPANIONS = (
     (f"{CODE}/src/ahu_fdd/simulat*.py", (f"{DOCS}/04 - Modelling.md",)),
     (f"{CODE}/src/ahu_fdd/triage.py", (f"{DOCS}/07 - Claude skills.md",)),
     (f"{CODE}/src/ahu_fdd/config.py", (f"{DOCS}/decisions.md",)),
-    (f"{CODE}/report/*.md", ("submission/report.pdf",)),
+    (f"{CODE}/report/*.md", ("project/report.pdf",)),
     (".claude/skills/*", (f"{DOCS}/07 - Claude skills.md",)),
     (".github/*", (f"{DOCS}/06 - Development workflow.md",)),
 )
@@ -36,7 +36,7 @@ NEEDS_CHANGELOG = (
     ".github/*",
 )
 # These must never go into the public repository
-PRIVATE = ("AGENTS.md", "CLAUDE.md", "context/*", "assignment/*", "*.parquet", ".env")
+PRIVATE = ("AGENTS.md", "CLAUDE.md", "context/*", "assignment/*", "data/*", "*.parquet", ".env")
 
 
 def git(*args: str) -> str:
@@ -83,7 +83,7 @@ def private_files(files: set[str]) -> list[str]:
 
 
 def run_tool(*command: str) -> tuple[bool, str]:
-    """Run a Python tool in submission/code. Returns if it passed and its last output line."""
+    """Run a Python tool in project/code. Returns if it passed and its last output line."""
     cwd = ROOT / CODE
     done = subprocess.run([sys.executable, "-m", *command], cwd=cwd, capture_output=True, text=True)
     lines = (done.stdout + done.stderr).strip().splitlines()

@@ -6,19 +6,24 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 
 ## [1.1.0] - YYYY-MM-DD
 
+### Added general
+- Clearer structure: code and results are in `project/` and the default data folder is `data/`.
+- The report has new section titles and no page limit in `report/build.py`.
+
 ### Added Claude skills
 - Five project skills in `.claude/skills/`: `ahu-alarm-triage`, `fault-sensitivity-test`, `definition-of-done`, `notebook-consistency` and `release-and-package` (this one only starts by hand).
 - Evaluation cases for `ahu-alarm-triage` in `evals/`: six real cases, with and without the skill.
 - New docs note `07 - Claude skills.md`: what each skill does, how to use it, the results and the limits.
 
 ### Added modelling
+- `format_problems()` checks `predictions.csv` every time `predict` writes it.
 - `triage.py`: the evidence for one alarm from the sensors and the rules, and the list of alarms in `predictions.csv`.
 - `sensitivity_table()`: one fault at several sizes on one AHU, with a control run with no fault.
 - `simulation.py` moved from `app/` to the package, so the app and the skill score a simulation in the same way. `rule_fires()` split out of `rule_predictions()`. `predictions.csv` is unchanged.
 
 ### Added DevOps
 - `.gitignore` allows `.claude/skills/` and keeps the other local Claude settings out.
-- CI lint also covers the skill scripts. New tests check their logic and each `SKILL.md`, and are skipped in the ZIP.
+- CI lint also covers the skill scripts. New tests check their logic and each `SKILL.md`, and are skipped where the folder is not there.
 
 ## [1.0.0] - 2026-11-05
 
@@ -31,24 +36,24 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 ### Added modelling
 - Fault injection with simple physics in `simulate.py` (stuck valve, stuck damper, sensor bias, weak coil), with unit tests.
 - The pipeline is split into `fit_pipeline()` and `predict_alarms()`, so a trained pipeline can be reused; `predictions.csv` is unchanged.
-- Fault simulator app in `app/` (Streamlit, own `requirements-app.txt`): inject a fault into a healthy AHU and see the signal, the model confidence and the alarms, scored like the brief.
+- Fault simulator app in `app/` (Streamlit, own `requirements-app.txt`): inject a fault into a healthy AHU and see the signal, the model confidence and the alarms, scored by event.
 
 ### Added report
-- Report sources in `submission/code/report/`, one Markdown file per question, with a page budget per section.
-- Architecture section (Q3): diagram (`report/architecture_diagram.py`, `figures/architecture.png`) and explanation: edge agent, Delta layers with automatic quality checks, MLflow with champion and challenger, hourly inference, alerting rules, monitoring, onboarding in under a week.
+- Report sources in `project/code/report/`, one Markdown file per section.
+- Architecture section: diagram (`report/architecture_diagram.py`, `figures/architecture.png`) and explanation: edge agent, Delta layers with automatic quality checks, MLflow with champion and challenger, hourly inference, alerting rules, monitoring, onboarding in under a week.
 - Architecture note in the docs: flow diagram, mapping from this repository to production, technology choices, edge agent, alerting rules, monitoring and onboarding tables.
 - Architecture: environments with Databricks Asset Bundles, a pass/warn/block data quality gate before inference, automatic closing of alarms and a monitoring dashboard.
-- Client communication section (Q4): reply to the facilities manager and internal note to the project lead, with the reasons behind both in Appendix A.
-- Report sections for Q1 (approach, data quality table, patterns, fault physics against the labels) and the Q2 summary, an "At a glance" box and a map of the submission on page 1, and an appendix with model details, the test alarms, questions for the client, what I would do with more time (cold start first), the fault simulator with an example, and how to reproduce.
-- `report/build.py` builds `submission/report.pdf` in LaTeX (pandoc and tectonic) and checks the 12-page limit. `pypdf` added to `requirements.txt` for the page check.
+- Communication section: reply to the facilities manager and internal note to the project lead, with the reasons behind both in Appendix A.
+- Report sections for the data analysis (approach, data quality table, patterns, fault physics against the labels) and the model summary, an "At a glance" box and a map of the project on page 1, and an appendix with model details, the test alarms, questions for the client, what I would do with more time (cold start first), the fault simulator with an example, and how to reproduce.
+- `report/build.py` builds `project/report.pdf` in LaTeX (pandoc and tectonic) and checks the page count. `pypdf` added to `requirements.txt` for the page check.
 
 ## [0.2.0] - 2026-11-05
 
 ### Added general
-- Documentation vault in `submission/code/docs/` (Obsidian, normal Markdown links): project map, data, data quality, AHU physics and faults, modelling, architecture, development workflow and decisions log.
+- Documentation vault in `project/code/docs/` (Obsidian, normal Markdown links): project map, data, data quality, AHU physics and faults, modelling, architecture, development workflow and decisions log.
 
 ### Added DevOps
-- One `feature/*` branch per phase and releases only at milestones (`v0.2.0` model end to end, `v1.0.0` final submission).
+- One `feature/*` branch per phase and releases only at milestones (`v0.2.0` model end to end, `v1.0.0` first full version).
 
 ### Added data and EDA
 - Data helpers: `add_building()`, `label_rows()` (paints each sensor row with its fault or `normal`), plain fault names in `config.py`.
@@ -77,7 +82,7 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 
 ### Added general
 - Project skeleton: `ahu_fdd` package with config and data loaders, README and decisions log.
-- Unit tests on small synthetic data, so they run without the client data.
+- Unit tests on small synthetic data, so they run without the sample data.
 
 ### Added DevOps
 - CI on every pull request: lint and format check with ruff, tests with a minimum coverage of 75%, and a branch policy check (`feature/*` -> `develop` -> `qa` -> `main`).
