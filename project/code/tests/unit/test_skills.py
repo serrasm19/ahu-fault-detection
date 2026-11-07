@@ -1,4 +1,4 @@
-"""Tests for the Claude skills in .claude/skills. Skipped in the ZIP, which doesn't have them."""
+"""Tests for the Claude skills in .claude/skills. Skipped where the folder is not there."""
 
 import importlib.util
 import re
@@ -56,7 +56,7 @@ def test_only_a_person_can_start_a_release():
 
 def test_a_source_change_needs_its_test_doc_and_changelog():
     check = _script("definition-of-done", "check_done")
-    missing = check.missing_companions({"submission/code/src/ahu_fdd/rules.py"})
+    missing = check.missing_companions({"project/code/src/ahu_fdd/rules.py"})
     assert any("test_rules.py" in line for line in missing)
     assert any("04 - Modelling.md" in line for line in missing)
     assert any("CHANGELOG.md" in line for line in missing)
@@ -65,9 +65,9 @@ def test_a_source_change_needs_its_test_doc_and_changelog():
 def test_a_complete_change_has_nothing_missing():
     check = _script("definition-of-done", "check_done")
     files = {
-        "submission/code/src/ahu_fdd/rules.py",
-        "submission/code/tests/unit/test_rules.py",
-        "submission/code/docs/04 - Modelling.md",
+        "project/code/src/ahu_fdd/rules.py",
+        "project/code/tests/unit/test_rules.py",
+        "project/code/docs/04 - Modelling.md",
         "CHANGELOG.md",
     }
     assert check.missing_companions(files) == []

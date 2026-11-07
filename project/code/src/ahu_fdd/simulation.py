@@ -93,7 +93,7 @@ def simulate(
     shown = after["timestamp"] >= window_start
     events = rows_to_events(after.assign(pred=alarms.values)[shown])
 
-    # Score it like the brief: found, delay, right type, false alarms
+    # Score it by event: found, delay, right type, false alarms
     in_fault = (events["end"] >= fault_start) & (events["start"] < fault_end)
     caught = events[in_fault] if fault != NORMAL else events.iloc[:0]
     detected = len(caught) > 0

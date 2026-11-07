@@ -1,6 +1,6 @@
 """Fault simulator: inject a fault into a healthy AHU and see if and when an alarm is raised.
 
-Run from submission/code/:  streamlit run app/streamlit_app.py
+Run from project/code/:  streamlit run app/streamlit_app.py
 """
 
 import altair as alt
@@ -48,7 +48,7 @@ st.write(
 try:
     fitted, data, labels = load_everything()
 except FileNotFoundError:
-    st.error("Data not found. Set AHU_DATA_DIR to the folder with the assignment data files.")
+    st.error("Data not found. Set AHU_DATA_DIR to the folder with the data files.")
     st.stop()
 
 # Sidebar: the machine and the period

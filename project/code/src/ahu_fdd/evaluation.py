@@ -1,4 +1,4 @@
-"""Event-level scoring, the way the brief describes it, and time-based validation folds."""
+"""Event-level scoring, the way a maintenance team sees faults, and time-based folds."""
 
 from collections.abc import Callable
 

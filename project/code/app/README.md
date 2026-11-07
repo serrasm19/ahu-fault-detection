@@ -4,7 +4,7 @@ A small Streamlit app to play with the model: pick a healthy AHU, inject one of 
 
 ## Run it
 
-From `submission/code/`, after the setup of the main README (the data must be in `../../assignment/data/` or in `AHU_DATA_DIR`):
+From `project/code/`, after the setup of the main README (the data must be in `../../data/` or in `AHU_DATA_DIR`):
 
 ```bash
 pip install -r app/requirements-app.txt
@@ -21,7 +21,7 @@ It opens in the browser. The first load trains the model on January to June (abo
 
 ## What you see
 
-- **Detected, delay, type, false alarms:** the same event-level scoring as the brief.
+- **Detected, delay, type, false alarms:** the same event-level scoring as the model.
 - **Chart 1:** the signal that shows the fault, healthy (grey) and with the fault (blue). The shaded band is the fault.
 - **Chart 2:** how sure the model is that something is wrong, with the confidence needed as a dashed line.
 - **Chart 3:** the alarms a technician would get, coloured by fault type.
