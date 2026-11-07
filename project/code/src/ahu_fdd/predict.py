@@ -10,6 +10,7 @@ import pandas as pd
 from ahu_fdd.config import (
     ALARM_MIN_PROB,
     CODE_DIR,
+    FAULT_TYPES,
     LGBM_PARAMS,
     MAX_GAP_ROWS,
     MIN_ALARM_ROWS,
@@ -158,13 +159,29 @@ def train_and_predict(
     )
 
 
-def to_submission(test_raw: pd.DataFrame, target: pd.DataFrame, pred: pd.Series) -> pd.DataFrame:
+def to_predictions(test_raw: pd.DataFrame, target: pd.DataFrame, pred: pd.Series) -> pd.DataFrame:
     """One row per row of the raw test file: ahu_id, timestamp, fault_type."""
     keyed = target[["ahu_id", "timestamp"]].assign(fault_type=pred.values)
     out = test_raw[["ahu_id", "timestamp"]].merge(keyed, on=["ahu_id", "timestamp"], how="left")
     # Every test row needs a value. The cleaning keeps all test rows, so this is only a safety net
     out["fault_type"] = out["fault_type"].fillna("normal")
     return out
+
+
+def format_problems(predictions: pd.DataFrame, test_raw: pd.DataFrame) -> list[str]:
+    """What is wrong with the predictions file: one row per raw test row, only known labels."""
+    problems = []
+    if list(predictions.columns) != ["ahu_id", "timestamp", "fault_type"]:
+        problems.append(f"wrong columns: {list(predictions.columns)}")
+        return problems
+    unknown = set(predictions["fault_type"].dropna()) - {NORMAL, *FAULT_TYPES}
+    if unknown:
+        problems.append(f"unknown fault types: {sorted(unknown)}")
+    if predictions["fault_type"].isna().any():
+        problems.append("empty fault types")
+    if len(predictions) != len(test_raw):
+        problems.append(f"{len(predictions)} rows, expected {len(test_raw)}")
+    return problems
 
 
 # Files that change the model: uncommitted edits here mean the commit doesn't tell the full story
@@ -185,7 +202,7 @@ def git_commit() -> dict:
             "uncommitted": bool(git("status", "--porcelain", *CODE_FILES)),
         }
     except (OSError, subprocess.CalledProcessError):
-        return {"commit": "unknown", "uncommitted": None}  # e.g. run from the ZIP, without git
+        return {"commit": "unknown", "uncommitted": None}  # e.g. run from a ZIP, without git
 
 
 def model_card(train: pd.DataFrame, labels: pd.DataFrame, validation: dict, alarms: int) -> dict:
@@ -232,15 +249,18 @@ def main(paths: Paths = PATHS) -> pd.DataFrame:
     # Final model on all of January to June
     fitted = fit_pipeline(train)
     pred = predict_alarms(fitted, test)
-    submission = to_submission(test_raw, test, pred)
-    submission.to_csv(paths.predictions, index=False)
+    predictions = to_predictions(test_raw, test, pred)
+    problems = format_problems(predictions, test_raw)
+    if problems:
+        raise ValueError(f"predictions are not valid: {problems}")
+    predictions.to_csv(paths.predictions, index=False)
 
     alarms = len(rows_to_events(test.assign(pred=pred.values)))
     card = model_card(train, labels, validation, alarms)
     folder = save_model(fitted.model, card, paths.artifacts_dir / f"lgbm-v{card['version']}")
-    print(f"Wrote {len(submission):,} rows to {paths.predictions} ({alarms} alarms)")
+    print(f"Wrote {len(predictions):,} rows to {paths.predictions} ({alarms} alarms)")
     print(f"Saved the model and its card to {folder}")
-    return submission
+    return predictions
 
 
 if __name__ == "__main__":

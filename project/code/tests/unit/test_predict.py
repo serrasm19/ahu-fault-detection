@@ -1,9 +1,9 @@
 import pandas as pd
 
-from ahu_fdd.predict import git_commit, model_card, to_submission
+from ahu_fdd.predict import format_problems, git_commit, model_card, to_predictions
 
 
-def test_to_submission_has_one_row_per_raw_test_row():
+def test_to_predictions_has_one_row_per_raw_test_row():
     raw = pd.DataFrame(
         {
             "ahu_id": ["B1-AHU-01", "B1-AHU-01", "B1-AHU-02"],
@@ -15,7 +15,7 @@ def test_to_submission_has_one_row_per_raw_test_row():
     )
     target = raw.iloc[[0, 2]]  # one row missing after cleaning: it must still get a prediction
     pred = pd.Series(["oa_damper_stuck", "normal"], index=target.index)
-    out = to_submission(raw, target, pred)
+    out = to_predictions(raw, target, pred)
     assert list(out.columns) == ["ahu_id", "timestamp", "fault_type"]
     assert out["fault_type"].tolist() == ["oa_damper_stuck", "normal", "normal"]
 
@@ -41,3 +41,26 @@ def test_model_card_has_the_version_data_and_scores():
     assert card["validation"]["right_type"] == 0.931
     assert card["test_alarms"] == 14
     assert card["train_period"][0] == pd.Timestamp("2025-01-01 00:00")
+
+
+def _predictions(faults):
+    stamps = pd.date_range("2025-07-01", periods=len(faults), freq="5min")
+    return pd.DataFrame({"ahu_id": "B1-AHU-01", "timestamp": stamps, "fault_type": faults})
+
+
+def test_format_problems_accepts_a_valid_file():
+    predictions = _predictions(["normal", "oa_damper_stuck"])
+    assert format_problems(predictions, predictions[["ahu_id", "timestamp"]]) == []
+
+
+def test_format_problems_finds_labels_and_row_count():
+    predictions = _predictions(["normal", "broken", None])
+    problems = format_problems(predictions, predictions.iloc[:2])
+    assert "unknown fault types: ['broken']" in problems
+    assert "empty fault types" in problems
+    assert "3 rows, expected 2" in problems
+
+
+def test_format_problems_stops_at_wrong_columns():
+    predictions = _predictions(["normal"]).rename(columns={"fault_type": "label"})
+    assert "wrong columns" in format_problems(predictions, predictions)[0]
