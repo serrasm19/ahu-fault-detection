@@ -7,7 +7,7 @@ Each version starts as `## [X.Y.Z] - YYYY-MM-DD`. The date is set in the last pu
 ## [1.1.0] - YYYY-MM-DD
 
 ### Added general
-- The repository now reads as a personal project, with a sample dataset and an example scenario: `submission/` is now `project/`, the default data folder is `data/`, and the report, notebooks, docs and READMEs no longer follow the structure of an exercise.
+- Clearer structure: code and results are in `project/` and the default data folder is `data/`.
 - The report has new section titles and no page limit in `report/build.py`.
 
 ### Added Claude skills
