@@ -6,9 +6,9 @@ The work is in `notebooks/05_modelling.ipynb` and `src/ahu_fdd/`. `python -m ahu
 
 ## How I score a model
 
-In plain words: before the real exam (July and August, scored by the client), I do practice exams on January to June, where I know the answers, and I mark them with the same rules the client uses. Without this, every model choice would be a guess.
+In plain words: before the real exam (July and August, with no labels), I do practice exams on January to June, where I know the answers, and I mark them the way a maintenance team would. Without this, every model choice would be a guess.
 
-The client scores by fault event, not by row (a model that always says "normal" is right on 97.6% of the rows and useless). `src/ahu_fdd/evaluation.py` copies what the brief describes, on fan-on rows only:
+What matters is the fault event, not the row (a model that always says "normal" is right on 97.6% of the rows and useless). `src/ahu_fdd/evaluation.py` does this, on fan-on rows only:
 
 | Question | How I measure it |
 |---|---|
@@ -108,7 +108,7 @@ After adding the step that joins the pieces of one fault (below), the rules give
 
 ## How I framed the problem
 
-The brief allows a classifier, a model of normal behaviour with residuals, rules, or a mix. I used a mix:
+The options are a classifier, a model of normal behaviour with residuals, rules, or a mix. I used a mix:
 - **Residuals:** every feature is "how far this machine is from its own normal" (second framing).
 - **A LightGBM classifier decides *if* there is a fault.** It gives the fewest false alarms.
 - **The physics rules decide *which* fault.** They get the type right more often.
@@ -131,7 +131,7 @@ Other options, and why not:
 | Random forest | Same family idea, but in validation it missed 2 of the 29 faults and got fewer types right (79%) |
 | XGBoost, CatBoost, scikit-learn HistGradientBoosting | Same family as LightGBM: I expect almost the same result. Worth a comparison with more time |
 | Neural networks (LSTM and similar) | 29 events are far too few to train them without learning them by heart |
-| Anomaly detection only (Isolation Forest, autoencoder) | Says "something is odd" but not which fault, and the brief scores the type. It also tends to give more false alarms |
+| Anomaly detection only (Isolation Forest, autoencoder) | Says "something is odd" but not which fault, and I need the type. It also tends to give more false alarms |
 
 ## From rows to alarms
 
@@ -195,7 +195,7 @@ The model doesn't transfer well to a building it never saw: it learned the stuck
 
 ## Test period
 
-`python -m ahu_fdd.predict` trains on January to June and writes `predictions.csv` (711,994 rows, accepted by `starter/validate_submission.py`). It raises 14 alarms in 40 machines over July and August. They include the eight candidates I saw by hand in notebook 04 (same type and dates), two weak radiators I couldn't look for by hand, and no alarm on B2-AHU-08, whose supply air sensor is frozen for 9 days.
+`python -m ahu_fdd.predict` trains on January to June and writes `predictions.csv` (711,994 rows, with its format checked by `format_problems()`). It raises 14 alarms in 40 machines over July and August. They include the eight candidates I saw by hand in notebook 04 (same type and dates), two weak radiators I couldn't look for by hand, and no alarm on B2-AHU-08, whose supply air sensor is frozen for 9 days.
 
 ## Model card
 
@@ -208,7 +208,7 @@ So every `predictions.csv` can be traced back to the exact model, code and data 
 
 ## Fault simulator
 
-`app/` has a small Streamlit app to play with the model: inject one of the four faults into a healthy AHU, with the size and dates you choose, and see the signal, the model's confidence and the alarms, scored like the brief. The physics of each injected fault is in `src/ahu_fdd/simulate.py` (with tests), and the app uses the same pipeline as `predictions.csv` (`fit_pipeline()` once, then `predict_alarms()`). How to run and use it: `app/README.md` and Appendix F of the report.
+`app/` has a small Streamlit app to play with the model: inject one of the four faults into a healthy AHU, with the size and dates you choose, and see the signal, the model's confidence and the alarms, scored by event. The physics of each injected fault is in `src/ahu_fdd/simulate.py` (with tests), and the app uses the same pipeline as `predictions.csv` (`fit_pipeline()` once, then `predict_alarms()`). How to run and use it: `app/README.md` and Appendix F of the report.
 
 ## How small a fault can it catch?
 
@@ -235,4 +235,4 @@ Limits: three machines, one window, and simple simulated physics. The faults sta
 - Compare XGBoost and CatBoost, and tune the model with more care.
 - A two-step model: first "is there a fault?", then "which one?".
 - Use the unlabelled data (self-training on confident alarms).
-- Ask the client for the technicians' "no fault found" outcomes, to measure false alarms on real visits.
+- Ask the operator for the technicians' "no fault found" outcomes, to measure false alarms on real visits.

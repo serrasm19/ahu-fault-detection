@@ -4,7 +4,7 @@ Back to the [project map](00%20-%20Project%20map.md).
 
 A skill is a written procedure that Claude Code follows, with scripts for the calculations. Think of the procedure binder in a workshop: nobody learns it by heart. You look at the index and open the sheet for the job. This note explains the five skills of this project, how to use them and what I measured.
 
-I added them after the delivery of v1.0.0, so they are not in the ZIP. They live at the root of the repository, in `.claude/skills/`.
+I added them after v1.0.0. They live at the root of the repository, in `.claude/skills/`.
 
 ## The skills
 
@@ -16,7 +16,7 @@ Two skills help to use the detector, and three keep the project in order.
 | [`fault-sensitivity-test`](../../../.claude/skills/fault-sensitivity-test/SKILL.md) | Measures the smallest fault the detector can still find. It injects simulated faults of several sizes into healthy machines and scores each run. | When you ask how sensitive the model is, how long it takes to find a small fault, or if a settings change made detection worse. | By itself or by hand | A table per fault size: found, delay, right type, false alarms |
 | [`definition-of-done`](../../../.claude/skills/definition-of-done/SKILL.md) | Checks that a change is really finished. It runs tests, coverage and lint, and looks for what should have changed too: docs, decisions, changelog, README or the report PDF. | Before a commit or a pull request, or when you ask "did I forget anything?". | By itself or by hand | Tests, lint, missing files, and what was not checked |
 | [`notebook-consistency`](../../../.claude/skills/notebook-consistency/SKILL.md) | Checks that the text of the notebooks and the report agrees with the real results. It looks for numbers that appear in no output, execution errors, cells out of order and missing sections. | After re-running a notebook, after code changes that move the results, or before a release. | By itself or by hand | Numbers in the text that no output supports |
-| [`release-and-package`](../../../.claude/skills/release-and-package/SKILL.md) | Prepares a version and promotes it from `develop` to `qa` and `main`. Then it builds the delivery ZIP and tests it in a clean folder, as a stranger would. | With `/release-and-package <version>`, because it touches protected branches and publishes a tag. It asks for approval before each pull request and never uploads the ZIP for you. | Only by hand | A release, and a ZIP tested in a clean folder |
+| [`release-and-package`](../../../.claude/skills/release-and-package/SKILL.md) | Prepares a version and promotes it from `develop` to `qa` and `main`. Then it builds the project ZIP and tests it in a clean folder, as a stranger would. | With `/release-and-package <version>`, because it touches protected branches and publishes a tag. It asks for approval before each pull request and never uploads the ZIP for you. | Only by hand | A release, and a ZIP tested in a clean folder |
 
 ## How to use them
 
@@ -25,7 +25,7 @@ There are two ways, both from Claude Code in this repository:
 1. **Ask in plain words.** "What is wrong with B1-AHU-11 from 22 April?" Claude compares the question with the description of each skill and opens the one that fits.
 2. **Call it by name.** Write `/ahu-alarm-triage B1-AHU-11 2025-04-23 2025-04-29`.
 
-The skills need the project environment and the data, so you can't run the first two without the client data, which is not in this repository. Their logic has unit tests on small synthetic data, and these run in CI.
+The skills need the project environment and the data, so you can't run the first two without the sample data, which is not in this repository. Their logic has unit tests on small synthetic data, and these run in CI.
 
 ## How a skill works
 

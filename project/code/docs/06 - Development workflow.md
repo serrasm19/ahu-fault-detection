@@ -14,7 +14,7 @@ ruff check --fix .
 ruff format .
 ```
 
-Unit tests use small synthetic data, so they run without the client data, for example in CI.
+Unit tests use small synthetic data, so they run without the sample data, for example in CI.
 
 ## How to run and check everything
 
@@ -48,7 +48,7 @@ feature/*  ->  develop  ->  qa  ->  main
 ## Releases
 
 - Changes go into `CHANGELOG.md` under the current undated version (`## [X.Y.Z] - YYYY-MM-DD`).
-- Releases only at real milestones: `v0.1.0` setup and CI, `v0.2.0` when the model builds the predictions end to end, `v1.0.0` final submission.
+- Releases only at real milestones: `v0.1.0` setup and CI, `v0.2.0` when the model builds the predictions end to end, `v1.0.0` first full version.
 - To release, a `feature/release-X.Y.Z` branch sets the date, then `develop` → `qa` → `main`.
 - On `main`, the `release` workflow creates the tag `vX.Y.Z` and a GitHub Release with the changelog notes. It never moves an existing tag.
 
@@ -58,4 +58,4 @@ Two steps of this workflow have a skill, so they are not done from memory. `defi
 
 ## Docs
 
-This folder is a small Obsidian vault. Notes use normal relative Markdown links, so they work in Obsidian, on GitHub and in the ZIP. When a change affects data handling, features, the model, the workflow or the architecture, the matching note is updated in the same pull request.
+This folder is a small Obsidian vault. Notes use normal relative Markdown links, so they work in Obsidian and on GitHub. When a change affects data handling, features, the model, the workflow or the architecture, the matching note is updated in the same pull request.

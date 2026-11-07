@@ -112,7 +112,7 @@ In plain words: notebook 03 is the doctor learning your normal temperature, and 
 - The lying thermometer is the hardest: the controller trusts the sensor, so the reading looks perfect while the machine runs. I check it with the fan off for an hour: with still air, supply and mixed air should read almost the same. Everyday example: to know if a scale lies, you look at it empty. If it shows 2 kg when empty, it lies.
 - Label dates match the data within one hour for the stuck tap and flap. Gaps at the end of office events are weekends.
 - Hard to see: the lying thermometer in 24/7 machines, and the stuck tap or weak radiator in the three machines always at their limit (B1-AHU-05, B3-AHU-02, B3-AHU-09).
-- One fault without a label: B1-AHU-11 has a stuck flap from 22 April (morning) to 30 April. At about 16:00 on 30 April the repair shows in the data: in half an hour the outdoor air comes back and CO2 falls from about 1,860 to 1,020 ppm. A technician fixed it, but there is no work order. I label it for training (otherwise the model learns that a stuck flap is healthy) and ask the client.
+- One fault without a label: B1-AHU-11 has a stuck flap from 22 April (morning) to 30 April. At about 16:00 on 30 April the repair shows in the data: in half an hour the outdoor air comes back and CO2 falls from about 1,860 to 1,020 ppm. A technician fixed it, but there is no work order. I label it for training (otherwise the model learns that a stuck flap is healthy) and ask the building operator.
 
 ![Fault signatures](../figures/04_fault_signatures.png)
 
@@ -124,7 +124,7 @@ The mixed air (`mat_c`) is a mix of outside air (`oat_c`) and air from the rooms
 
 Example: OAT = 30 °C, RAT = 24 °C and MAT = 25 °C, so x = (25 − 24) / (30 − 24) ≈ 0.17. About 17% of the air comes from outside.
 
-With a **stuck flap**, x stays close to 0 (MAT ≈ RAT) even when the flap is told to open. The formula is in `starter/ahu_utils.py` (`outdoor_air_fraction`). It is unreliable when OAT and RAT are close (less than 2 °C apart), because then a small error in the sensors changes x a lot.
+With a **stuck flap**, x stays close to 0 (MAT ≈ RAT) even when the flap is told to open. The formula is in `src/ahu_fdd/features.py` (`outdoor_air_fraction`). It is unreliable when OAT and RAT are close (less than 2 °C apart), because then a small error in the sensors changes x a lot.
 
 ## References
 

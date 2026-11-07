@@ -2,7 +2,7 @@
 
 Back to the [project map](00%20-%20Project%20map.md).
 
-This note lists each data problem I found, how I found it, what I did, and what I would ask the client. The details and charts are in `notebooks/02_data_quality.ipynb`. All fixes run together in `clean_sensors()` (`src/ahu_fdd/data.py`), on train and test.
+This note lists each data problem I found, how I found it, what I did, and what I would ask the building operator. The details and charts are in `notebooks/02_data_quality.ipynb`. All fixes run together in `clean_sensors()` (`src/ahu_fdd/data.py`), on train and test.
 
 First look (from `notebooks/01_data_overview.ipynb`). The diary should work like an attendance list: one row per machine every 5 minutes. In train, each building breaks it in its own way, and in the same way for all its machines:
 

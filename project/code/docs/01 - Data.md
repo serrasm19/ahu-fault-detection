@@ -4,7 +4,7 @@ Back to the [project map](00%20-%20Project%20map.md).
 
 This note explains the four data files in plain words: what each one is, what it looks like, how they connect, and how the data moves through the code. If you don't know what an AHU is yet, read [AHU physics and faults](03%20-%20AHU%20physics%20and%20faults.md) first.
 
-The client data is not in the repository. The code reads it from the folder set in `config.py` (or `AHU_DATA_DIR`).
+The sample data is not in the repository. The code reads it from the folder set in `config.py` (or `AHU_DATA_DIR`).
 
 ## The four files, like the papers of a car garage
 

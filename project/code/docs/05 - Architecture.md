@@ -48,11 +48,11 @@ Most pieces already exist here in a small form. Production is mostly the same co
 
 | Choice | Why | Main alternative |
 |---|---|---|
-| Azure | The buildings run Windows and SQL Server, so the client most likely already has Microsoft accounts, identity and support | AWS or GCP: fine, nothing here depends on Azure-only services except identity |
+| Azure | The buildings run Windows and SQL Server, so the operator most likely already has Microsoft accounts, identity and support | AWS or GCP: fine, nothing here depends on Azure-only services except identity |
 | Databricks | Delta tables, scheduled jobs, MLflow and a model registry with aliases in one place. I ran this exact pattern in production in my last project, so delivery risk is low | Containers (Azure Container Apps jobs) + Parquet in blob storage + managed MLflow: cheaper at this size, more pieces to glue |
 | Python edge agent | Same language as the rest; a Windows service is easy to install and update; outbound HTTPS only | Azure IoT Edge or Data Factory self-hosted runtime: more features, heavier to install on 25 different PCs |
 | Hourly batch inference | Faults last days, alarms need 2 hours, the lying thermometer only shows at night | Streaming every 5 minutes: more cost, no real gain for a visit the next day |
-| LightGBM + physics rules | Results of Question 2: fewest false alarms and right fault type | See `04 - Modelling.md` |
+| LightGBM + physics rules | Results of the model: fewest false alarms and right fault type | See `04 - Modelling.md` |
 
 ## Environments and deployment
 
@@ -114,4 +114,4 @@ First month after go-live: two weeks in shadow mode, then alerts with a weekly r
 | 4-5 | With 2+ weeks of history: learn each AHU's normal and start the physics rules in shadow mode. Without it: rules wait until 2 weeks of data arrive |
 | Later | Once the building has its own confirmed work orders, retrain the model with them and move to the model + rules combination |
 
-The two weeks to learn each machine's normal come from Question 2 (new building test). Most BMS keep months of trend history, so in practice the normal can be learned on day 3.
+The two weeks to learn each machine's normal come from the new building test in Modelling. Most BMS keep months of trend history, so in practice the normal can be learned on day 3.
