@@ -1,4 +1,6 @@
-# 4. Client communication
+# 4. Communicating results: an example
+
+This section is an example scenario, to show how I explain a model to people who depend on it. Two weeks after a pilot starts in one building, the facilities manager writes: the system raised 9 alerts last week, the technicians checked 4 and found nothing wrong, they are starting to ignore the alerts, and the owner wants two more buildings next month.
 
 The reasons behind both texts are in Appendix A.
 

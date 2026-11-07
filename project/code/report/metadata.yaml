@@ -1,8 +1,8 @@
 # Document settings for pandoc (title block, page and font)
 title: "AHU fault detection and diagnosis"
-subtitle: "Data Scientist (Machine Learning) take-home, VentureSEA Digital"
+subtitle: "A personal machine learning project"
 author: "Sergio Serrano"
-date: "5 November 2026"
+date: "November 2026"
 documentclass: article
 papersize: a4
 fontsize: 10pt

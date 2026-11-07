@@ -1,4 +1,4 @@
-"""Build submission/report.pdf from the Markdown sections: python report/build.py (from code/)
+"""Build project/report.pdf from the Markdown sections: python report/build.py (from code/)
 
 Needs pandoc and tectonic (brew install pandoc tectonic) and pypdf (pip install pypdf).
 """
@@ -9,10 +9,9 @@ from pathlib import Path
 from pypdf import PdfReader
 
 REPORT_DIR = Path(__file__).resolve().parent
-OUTPUT = REPORT_DIR.parents[1] / "report.pdf"  # submission/report.pdf, next to code/
+OUTPUT = REPORT_DIR.parents[1] / "report.pdf"  # project/report.pdf, next to code/
 
-# Sections in order. The appendix starts on a new page and does not count in the 12 pages
-# Each question starts on a new page (newpage.md is a page break)
+# Sections in order. Each section and the appendix start on a new page (newpage.md is a break)
 MAIN = [
     "00_cover.md",
     "01_eda.md",
@@ -24,7 +23,6 @@ MAIN = [
     "04_client.md",
 ]
 APPENDIX = ["appendix.md"]
-MAX_PAGES = 12
 
 
 def pandoc(sections: list[str], output: Path) -> None:
@@ -53,18 +51,8 @@ def page_count(pdf: Path) -> int:
 
 
 def main() -> None:
-    # First the main part alone, to check the page limit of the brief
-    main_only = REPORT_DIR / "main_only.pdf"
-    pandoc(MAIN, main_only)
-    main_pages = page_count(main_only)
-    main_only.unlink()
-
-    # Then the full report, with the appendix on a new page
     pandoc([*MAIN, "newpage.md", *APPENDIX], OUTPUT)
-    total = page_count(OUTPUT)
-    status = "OK" if main_pages <= MAX_PAGES else "TOO LONG"
-    appendix = total - main_pages
-    print(f"{OUTPUT}: {main_pages} main pages ({status}, max {MAX_PAGES}) + {appendix} appendix")
+    print(f"{OUTPUT}: {page_count(OUTPUT)} pages")
 
 
 if __name__ == "__main__":

@@ -9,13 +9,13 @@ I worked in four steps, one notebook each (`code/notebooks/01` to `04`), and tur
 3. **What a healthy machine looks like** (`03_patterns`): only rows with the fan on and no fault label, because a fault is a change from normal.
 4. **How each fault shows** (`04_faults`): the physics I expect, checked against the 28 labelled events, compared with the healthy rows of the same machine.
 
-The data covers 40 AHUs in three buildings: an office (B1, 16 units), a hospital (B2, 12 units, 24/7, with CO2 and airflow) and a mall (B3, 12 units, no extra sensors). There are 2.05 million rows in train and 0.71 million in test. Only rows with the fan on are scored, and in those, faults are 2.4% of the rows: 28 events in 21 machines, 6 to 8 per fault type, lasting 2 to 15 days. **Assumption:** the brief says UTC+8 but not where. The office closed on exactly the seven weekdays that are Singapore 2025 public holidays, so I assume Singapore.
+The data covers 40 AHUs in three buildings: an office (B1, 16 units), a hospital (B2, 12 units, 24/7, with CO2 and airflow) and a mall (B3, 12 units, no extra sensors). There are 2.05 million rows in train and 0.71 million in test. Only rows with the fan on are scored, and in those, faults are 2.4% of the rows: 28 events in 21 machines, 6 to 8 per fault type, lasting 2 to 15 days. **Assumption:** the data description says UTC+8 but not where. The office closed on exactly the seven weekdays that are Singapore 2025 public holidays, so I assume Singapore.
 
 ## 1.2 Data quality
 
 Each building had its own problem, the same in all its machines, which points to how each BMS stored or exported the data, not to broken sensors. The test period is clean apart from one frozen sensor.
 
-| Problem | How I found it | What I did | What I would ask the client |
+| Problem | How I found it | What I did | What I would ask the operator |
 |---|---|---|---|
 | **Office week stamped 8 hours early** (B1, 1 to 8 June): duplicates on 1 June, a hole on 8 June, the office "running at night" | The three buildings share the same weather. The office outside temperature matches the mall exactly 8 hours later (0.4 °C gap) and not at the same time (3.6 °C); trying every offset from -12 to +12 h, the best is +8 | Moved the block 8 hours later (`fix_clock_shift()`); 13 rows with an unknown clock dropped | Did the BMS change its time settings in early June? |
 | **One mall day saved twice** (B3, 14 February) | 3,439 duplicate pairs; 97.9% identical, the rest differ only by an empty value | Kept one row and filled empty values from the other copy (`merge_duplicates()`) | Was the data joined from overlapping exports? |
@@ -61,7 +61,7 @@ I compared each labelled event with the healthy rows of the same machine. Every 
 **Looks like a fault but is not labelled:**
 
 - **B1-AHU-11, 22 to 30 April:** a textbook stuck damper (outdoor air share near 0, flap command 70% instead of 15%, CO2 from 980 to 1,700 ppm), and on 30 April at about 16:00 the data shows the repair: outdoor air comes back and CO2 drops in half an hour. There is no work order. I added it as a training label, because leaving it as normal would teach the model that a stuck damper is healthy.
-- The three machines always at their limit look like a permanent low coil capacity, but I treat them as normal (undersized units), as the client labels them.
+- The three machines always at their limit look like a permanent low coil capacity, but I treat them as normal (undersized units), as the labels say.
 
 **Labelled but hard to see:**
 
