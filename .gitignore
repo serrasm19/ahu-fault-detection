@@ -4,16 +4,16 @@
 !/README.md
 !/CHANGELOG.md
 !/.github/
-!/submission/
+!/project/
 
 # From .claude/ only the skills are public; local settings stay local
 !/.claude/
 /.claude/*
 !/.claude/skills/
 
-# Inside submission/, the only csv allowed is the final predictions file
+# Inside project/, the only csv allowed is the final predictions file
 *.csv
-!/submission/predictions.csv
+!/project/predictions.csv
 
 # Data
 *.parquet
