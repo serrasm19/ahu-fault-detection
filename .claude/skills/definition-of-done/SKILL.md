@@ -22,7 +22,7 @@ The script checks what a machine can check. Then you check what needs reading. A
 3. **Read what the script can't judge.** Open the changed docs and ask:
 
    - Does the note say what the code does now, with real numbers?
-   - Does a new cleaning choice, assumption or modelling choice have a row in `submission/code/docs/decisions.md`?
+   - Does a new cleaning choice, assumption or modelling choice have a row in `project/code/docs/decisions.md`?
    - If model code changed, does `python -m ahu_fdd.predict` still give the same `predictions.csv`? If it changed on purpose, is that written down?
    - If `src/` changed, do the notebooks that use it still run? Their outputs must match the code.
    - Do `AGENTS.md` and `context/WORK_PLAN.md` exist? They are local only. If they do, follow their rules and tick the finished tasks.

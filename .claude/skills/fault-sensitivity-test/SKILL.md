@@ -55,4 +55,4 @@ Run from the repository root with the project environment. It takes about a minu
 - Size 100% on capacity, or the normal position on a valve, is no fault. Don't read a miss there as a failure.
 - A lying thermometer can only show on machines that switch off, so don't test it on a 24/7 machine and call the result a model failure. Say it is a known blind spot.
 
-If the user wants to see one run in charts, point them to the fault simulator app: `streamlit run app/streamlit_app.py` from `submission/code/`.
+If the user wants to see one run in charts, point them to the fault simulator app: `streamlit run app/streamlit_app.py` from `project/code/`.

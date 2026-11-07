@@ -8,7 +8,7 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
-CODE = ROOT / "submission" / "code"
+CODE = ROOT / "project" / "code"
 READMES = (ROOT / "README.md", CODE / "README.md")
 
 

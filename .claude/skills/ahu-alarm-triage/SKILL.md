@@ -11,7 +11,7 @@ Turn an alarm into a short diagnosis a maintenance team can act on. The script g
 
 Run the commands from the repository root with the project environment (`.venv/bin/python` if it exists). The data folder comes from `AHU_DATA_DIR` or the default in `config.py`.
 
-1. **Find the alarm.** If you have no machine and dates, list the alarms in `submission/predictions.csv` and ask which one, or take the one the user describes:
+1. **Find the alarm.** If you have no machine and dates, list the alarms in `project/predictions.csv` and ask which one, or take the one the user describes:
 
    ```bash
    .venv/bin/python .claude/skills/ahu-alarm-triage/scripts/alarm_evidence.py --list
@@ -50,4 +50,4 @@ Work from the sensors. Don't open the work orders (`fault_labels_train.csv`) or 
 **Limits:** <what this data can't show here, for example no checks at rest>
 ```
 
-If the user asks for a message to the client or a work order, write it after the card, in plain words, without labels or model terms.
+If the user asks for a message for the building team or a work order, write it after the card, in plain words, without labels or model terms.

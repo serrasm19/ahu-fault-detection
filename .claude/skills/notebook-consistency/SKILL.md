@@ -12,12 +12,12 @@ A notebook is built in two steps: the code writes the outputs, and a person writ
 1. **Run the script** from the repository root. Give it the notebooks, and the report sources if the numbers there come from the notebooks:
 
    ```bash
-   .venv/bin/python .claude/skills/notebook-consistency/scripts/check_numbers.py submission/code/notebooks/*.ipynb --text submission/code/report/*.md
+   .venv/bin/python .claude/skills/notebook-consistency/scripts/check_numbers.py project/code/notebooks/*.ipynb --text project/code/report/*.md
    ```
 
 2. **Fix any `ERROR` line first.** A notebook with an error, or run out of order, has outputs you can't trust. Run it again before you look at its numbers.
 
-3. **Read every `NOT FOUND` line** with its sentence. Many are fine: a setting from `config.py`, a number from the brief, a date, or a value computed in the text. A real mismatch is a result that changed. Check in `src/ahu_fdd/config.py` and in the data before you call it wrong.
+3. **Read every `NOT FOUND` line** with its sentence. Many are fine: a setting from `config.py`, a number from the data description, a date, or a value computed in the text. A real mismatch is a result that changed. Check in `src/ahu_fdd/config.py` and in the data before you call it wrong.
 
 4. **Look at `FAR` lines only for key results.** The number exists, but not near this text, so it could be a coincidence.
 
